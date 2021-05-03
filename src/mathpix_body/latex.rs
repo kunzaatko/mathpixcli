@@ -1,6 +1,6 @@
 use super::{Src, FormatOptions, Region, CallBack, MetaData};
 
-pub struct LaTeXRequest {
+pub struct PostLaTeX {
     src: Src,
     formats: Vec<String>,
     ocr: Option<Vec<String>>,

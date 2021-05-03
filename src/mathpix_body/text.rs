@@ -1,6 +1,6 @@
 use super::{AlphabetsAllowed, DataOptions, MetaData, Src};
 
-pub struct TextRequest {
+pub struct PostText {
     src: Src,
     metadata: Option<MetaData>,
     // TODO: This should instead be a list of enums that specifies the allowed formats.

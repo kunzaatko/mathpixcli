@@ -1,5 +1,5 @@
 use super::Url;
 
-pub struct PDFRequest {
+pub struct PostPDF {
     url: Url,
 }

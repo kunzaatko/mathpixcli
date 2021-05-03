@@ -1,7 +1,7 @@
 use super::{DataOptions, MetaData};
 use json::JsonValue;
 
-pub struct StrokesRequest {
+pub struct PostStrokes {
     // NOTE: on construction, `is_array(&self)` should be used to check whether it is an array.
     // Also eltype should be Number (`is_number(&self)`)
     strokes: JsonValue,
