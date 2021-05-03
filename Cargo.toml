@@ -1,0 +1,31 @@
+[package]
+name = "mathpix"
+version = "0.1.0"
+authors = ["Martin Kunz <martinkunz@email.cz>"]
+edition = "2018"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[lib]
+name = "mathpixapi"
+path = "src/lib.rs"
+
+[[bin]]
+name = "mathpixcli"
+path = "src/bin.rs"
+required-features = ["clap"]
+
+[dependencies]
+json = "0.12.4"
+url = "2.2.1"
+
+[dependencies.reqwest]
+version = "0.11.3"
+features = ["json"]
+
+[dependencies.clap]
+version = "3.0.0-beta.2"
+optional = true
+
+[dev-dependencies]
+tempdir = "0.3.7"
