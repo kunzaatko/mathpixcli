@@ -3,9 +3,11 @@ name = "mathpix"
 version = "0.1.0"
 authors = ["Martin Kunz <martinkunz@email.cz>"]
 edition = "2018"
+description = "A mathpix api interaction library along with a cli that can read from stdin and read from a config."
+repository = "https://github.com/kunzaatko/mathpixcli"
+license = "MIT OR Apache-2.0"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
-
 [lib]
 name = "mathpixapi"
 path = "src/lib.rs"
@@ -18,14 +20,12 @@ required-features = ["clap"]
 [dependencies]
 json = "0.12.4"
 url = "2.2.1"
-
-[dependencies.reqwest]
-version = "0.11.3"
-features = ["json"]
-
-[dependencies.clap]
-version = "3.0.0-beta.2"
-optional = true
+base64 = "0.13.0"
+mime = "0.3.16"
+log = { version = "0.4.14"}
+reqwest = { version = "0.11.3", features = ["json"] }
+clap = { version = "3.0.0-beta.2", optional = true }
+serde = { version = "1.0.125", features = ["derive"] }
 
 [dev-dependencies]
-tempdir = "0.3.7"
+maplit = "1.0.2"
