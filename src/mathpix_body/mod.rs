@@ -1,4 +1,6 @@
-use url::Url;
+use super::base64image::Base64Image;
+use reqwest::Url;
+use serde::{Serialize, Serializer};
 
 mod batch;
 mod latex;
@@ -21,28 +23,47 @@ pub enum MathpixPost {
     LaTeX(PostLaTeX),
 }
 
-struct Src {
-    src: String,
+// this will be very usefull: https://serde.rs/container-attrs.html#into
+// TODO: Serialize should be implemented manually to convert pictures to base64 Strings and urls
+// to standard Strings <22-05-21, kunzaatko> //
+#[derive(Debug, Serialize)]
+enum Src {
+    Image(Base64Image),
+    #[serde(serialize_with = "ser_url_as_string")]
+    Url(Url),
 }
+
+fn ser_url_as_string<S>(url: &Url, ser: S) -> Result<S::Ok, S::Error>
+where
+    S: Serializer,
+{
+    todo!();
+}
+
 // TODO: Ask mathpix what are the possibilities for MetaData <14-05-21, kunzaatko> //
+#[derive(Debug, Serialize)]
 struct MetaData {}
+
 // DataOptions {{{
+#[derive(Debug, Serialize)]
 struct DataOptions {
     /// Include math SVG in `html` and `data` formats
-    include_svg: bool,
+    include_svg: Option<bool>,
     /// Include HTML for `html` and `data` outputs (tables only)
-    include_table_html: bool,
+    include_table_html: Option<bool>,
     /// Include math mode latex in `data` and `html`
-    include_latex: bool,
+    include_latex: Option<bool>,
     /// Include tab separated values (TSV) in `data` and `html` outputs (tables only)
-    include_tsv: bool,
+    include_tsv: Option<bool>,
     /// Include asciimath in `data` and `html` outputs
-    include_asciimath: bool,
+    include_asciimath: Option<bool>,
     /// Include mathml in `data` and `html` outputs
-    include_mathml: bool,
+    include_mathml: Option<bool>,
 }
 //}}}
+
 // FormatOptions {{{
+#[derive(Debug, Serialize)]
 struct FormatOptions {
     /// Array of transformation names
     transforms: Vec<String>,
@@ -54,7 +75,9 @@ struct FormatOptions {
     dispaymath_delims: Vec<String>,
 }
 //}}}
+
 // Region {{{
+#[derive(Debug, Serialize)]
 struct Region {
     top_left_x: Option<u32>,
     top_left_y: Option<u32>,
@@ -62,7 +85,9 @@ struct Region {
     height: Option<u32>,
 }
 //}}}
+
 // CallBack {{{
+#[derive(Debug, Serialize)]
 struct CallBack {
     /// URL to which to make POST callback
     post: Option<String>,

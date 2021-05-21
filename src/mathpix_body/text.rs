@@ -1,6 +1,7 @@
 use super::{DataOptions, MetaData, Src};
 use serde::Serialize;
 
+#[derive(Serialize, Debug)]
 pub struct PostText {
     src: Src,
     metadata: Option<MetaData>,
@@ -26,6 +27,8 @@ pub struct PostText {
 
 // TextFormats {{{
 /// Formats possible for the text endpoint
+#[derive(Debug, Serialize)]
+#[serde(rename_all = "snake_case")]
 enum TextFormats {
     /// Mathpix markdown formatted text
     Text,

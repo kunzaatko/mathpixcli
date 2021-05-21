@@ -3,3 +3,4 @@ pub const APIURL: &str = "https://api.mathpix.com/v3/";
 
 mod mathpix_body;
 mod mathpix_header;
+mod base64image;
