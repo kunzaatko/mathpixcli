@@ -1,4 +1,5 @@
 use super::{DataOptions, MetaData, Src};
+use serde::Serialize;
 
 pub struct PostText {
     src: Src,
@@ -50,7 +51,7 @@ impl ToString for TextFormats {
 //}}}
 
 // AlphabetsAllowed {{{
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Serialize)]
 struct AlphabetsAllowed {
     /// English
     en: Option<bool>,
@@ -129,9 +130,11 @@ impl AlphabetsAllowed {
 #[cfg(test)]
 mod test {
     use super::AlphabetsAllowed;
+    use serde_json::json;
 
     #[test]
     fn alphabets_allow() {
+        //{{{
         let mut alphabets = AlphabetsAllowed::new();
         alphabets
             .allow(vec!["en".to_string(), "ru".to_string()])
@@ -148,10 +151,11 @@ mod test {
                 zh: None,
             }
         )
-    }
+    } //}}}
 
     #[test]
     fn alphabets_disallow() {
+        //{{{
         let mut alphabets = AlphabetsAllowed::new();
         alphabets
             .disallow(vec!["en".to_string(), "ru".to_string()])
@@ -168,10 +172,11 @@ mod test {
                 zh: None,
             }
         )
-    }
+    } //}}}
 
     #[test]
     fn alphabets_disallow_and_allow() {
+        //{{{
         let mut alphabets = AlphabetsAllowed::new();
         alphabets
             .disallow(vec!["en".to_string(), "ru".to_string()])
@@ -191,6 +196,28 @@ mod test {
                 zh: None,
             }
         )
+    } //}}}
+
+    #[test]
+    fn alphabets_serialization() {
+        let mut alphabets = AlphabetsAllowed::new();
+        alphabets
+            .disallow(vec!["en".to_string(), "ru".to_string()])
+            .unwrap();
+        alphabets
+            .allow(vec!["en".to_string(), "hi".to_string()])
+            .unwrap();
+        let serialized = serde_json::to_value(&alphabets).unwrap();
+        let acctual = json!({
+                "en": true,
+                "ru": false,
+                "hi": true,
+                "ja": serde_json::Value::Null,
+                "ko": serde_json::Value::Null,
+                "th": serde_json::Value::Null,
+                "zh": serde_json::Value::Null,
+        });
+        assert_eq!(acctual, serialized);
     }
 }
 //}}}

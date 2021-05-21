@@ -1,5 +1,5 @@
 use super::{DataOptions, MetaData};
-use json::JsonValue;
+use serde_json::Value as JsonValue;
 
 pub struct PostStrokes {
     // NOTE: on construction, `is_array(&self)` should be used to check whether it is an array.
