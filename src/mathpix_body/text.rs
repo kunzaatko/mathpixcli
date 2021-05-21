@@ -1,4 +1,4 @@
-use super::{AlphabetsAllowed, DataOptions, MetaData, Src};
+use super::{DataOptions, MetaData, Src};
 
 pub struct PostText {
     src: Src,
@@ -23,6 +23,7 @@ pub struct PostText {
     numbers_default_to_math: Option<bool>,
 }
 
+// TextFormats {{{
 /// Formats possible for the text endpoint
 enum TextFormats {
     /// Mathpix markdown formatted text
@@ -46,3 +47,150 @@ impl ToString for TextFormats {
         }
     }
 }
+//}}}
+
+// AlphabetsAllowed {{{
+#[derive(Debug, PartialEq)]
+struct AlphabetsAllowed {
+    /// English
+    en: Option<bool>,
+    /// Hindi Devangari
+    hi: Option<bool>,
+    /// Chinese
+    zh: Option<bool>,
+    /// Kana Hiragana or Katakana
+    ja: Option<bool>,
+    /// Hangul Jamo
+    ko: Option<bool>,
+    /// Russian
+    ru: Option<bool>,
+    /// Thai
+    th: Option<bool>,
+}
+
+impl AlphabetsAllowed {
+    fn new() -> Self {
+        AlphabetsAllowed {
+            en: None,
+            hi: None,
+            zh: None,
+            ja: None,
+            ko: None,
+            ru: None,
+            th: None,
+        }
+    }
+
+    fn disallow(&mut self, alphabets: Vec<String>) -> Result<(), String> {
+        for alphabet in alphabets {
+            match alphabet.as_str() {
+                "en" => self.en = Some(false),
+                "hi" => self.hi = Some(false),
+                "zh" => self.zh = Some(false),
+                "ja" => self.ja = Some(false),
+                "ko" => self.ko = Some(false),
+                "ru" => self.ru = Some(false),
+                "th" => self.th = Some(false),
+                other => {
+                    return Err(format!(
+                    "UnknownAlphabet: {} is not in known alphabets (en, hi, zh, ja, ko, ru, th)",
+                    other
+                ))
+                }
+            }
+        }
+        Ok(())
+    }
+
+    fn allow(&mut self, alphabets: Vec<String>) -> Result<(), String> {
+        for alphabet in alphabets {
+            match alphabet.as_str() {
+                "en" => self.en = Some(true),
+                "hi" => self.hi = Some(true),
+                "zh" => self.zh = Some(true),
+                "ja" => self.ja = Some(true),
+                "ko" => self.ko = Some(true),
+                "ru" => self.ru = Some(true),
+                "th" => self.th = Some(true),
+                other => {
+                    return Err(format!(
+                    "UnknownAlphabet: {} is not in known alphabets (en, hi, zh, ja, ko, ru, th)",
+                    other
+                ))
+                }
+            }
+        }
+        Ok(())
+    }
+}
+// }}}
+
+// TESTS {{{
+#[cfg(test)]
+mod test {
+    use super::AlphabetsAllowed;
+
+    #[test]
+    fn alphabets_allow() {
+        let mut alphabets = AlphabetsAllowed::new();
+        alphabets
+            .allow(vec!["en".to_string(), "ru".to_string()])
+            .unwrap();
+        assert_eq!(
+            alphabets,
+            AlphabetsAllowed {
+                en: Some(true),
+                ru: Some(true),
+                hi: None,
+                ja: None,
+                ko: None,
+                th: None,
+                zh: None,
+            }
+        )
+    }
+
+    #[test]
+    fn alphabets_disallow() {
+        let mut alphabets = AlphabetsAllowed::new();
+        alphabets
+            .disallow(vec!["en".to_string(), "ru".to_string()])
+            .unwrap();
+        assert_eq!(
+            alphabets,
+            AlphabetsAllowed {
+                en: Some(false),
+                ru: Some(false),
+                hi: None,
+                ja: None,
+                ko: None,
+                th: None,
+                zh: None,
+            }
+        )
+    }
+
+    #[test]
+    fn alphabets_disallow_and_allow() {
+        let mut alphabets = AlphabetsAllowed::new();
+        alphabets
+            .disallow(vec!["en".to_string(), "ru".to_string()])
+            .unwrap();
+        alphabets
+            .allow(vec!["en".to_string(), "hi".to_string()])
+            .unwrap();
+        assert_eq!(
+            alphabets,
+            AlphabetsAllowed {
+                en: Some(true),
+                ru: Some(false),
+                hi: Some(true),
+                ja: None,
+                ko: None,
+                th: None,
+                zh: None,
+            }
+        )
+    }
+}
+//}}}

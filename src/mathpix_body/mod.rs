@@ -54,24 +54,6 @@ struct FormatOptions {
     dispaymath_delims: Vec<String>,
 }
 //}}}
-// AlphabetsAllowed {{{
-struct AlphabetsAllowed {
-    /// English
-    en: bool,
-    /// Hindi Devangari
-    hi: bool,
-    /// Chinese
-    zh: bool,
-    /// Kana Hiragana or Katakana
-    ja: bool,
-    /// Hangul Jamo
-    ko: bool,
-    /// Russian
-    ru: bool,
-    /// Thai
-    th: bool,
-}
-// }}}
 // Region {{{
 struct Region {
     top_left_x: Option<u32>,
