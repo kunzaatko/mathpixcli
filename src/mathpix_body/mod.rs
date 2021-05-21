@@ -24,17 +24,6 @@ pub enum MathpixPost {
 struct Src {
     src: String,
 }
-enum Formats {
-    /// Mathpix markdown formatted text
-    Text,
-    /// HTML rendered from `text` via mathpix-markdown-it
-    Html,
-    /// Data extracte from `html` as specified in the `data_options` request parameter
-    Data,
-    /// Styled Latex, returned only in cases that the whole image can be reduces to a single
-    /// equation
-    LatexStyled,
-}
 // TODO: Ask mathpix what are the possibilities for MetaData <14-05-21, kunzaatko> //
 struct MetaData {}
 // DataOptions {{{
