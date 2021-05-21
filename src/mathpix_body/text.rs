@@ -1,11 +1,11 @@
-use super::{AlphabetsAllowed, DataOptions, MetaData, Src};
+use super::{AlphabetsAllowed, DataOptions, MetaData, Src, Formats};
 
 pub struct PostText {
     src: Src,
     metadata: Option<MetaData>,
     // TODO: This should instead be a list of enums that specifies the allowed formats.
 // Formats type should be implemented in super. <01-05-21, kunzaatko> //
-    formats: Option<Vec<String>>, 
+    formats: Option<Formats>,
     data_options: Option<DataOptions>,
     include_detected_alphabets: Option<bool>,
     alphabets_allowed: Option<AlphabetsAllowed>,
