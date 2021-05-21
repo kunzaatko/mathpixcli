@@ -51,6 +51,8 @@ impl ToString for TextFormats {
 //}}}
 
 // AlphabetsAllowed {{{
+// NOTE: Serialization adds serde_json::Value::Null when None... This may not work with the API. A
+// test is needed. <21-05-21, kunzaatko> //
 #[derive(Debug, PartialEq, Serialize)]
 struct AlphabetsAllowed {
     /// English
