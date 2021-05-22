@@ -29,6 +29,7 @@ impl Serialize for Base64Image {
     }
 }
 
+// TESTS {{{
 #[cfg(test)]
 mod test {
     use super::Base64Image;
@@ -58,3 +59,4 @@ mod test {
         assert_eq!(serialized, acctual);
     } //}}}
 }
+//}}}

@@ -103,6 +103,7 @@ struct CallBack {
 }
 //}}}
 
+// TESTS {{{
 #[cfg(test)]
 mod test {
     use super::{DataOptions, Src};
@@ -142,3 +143,4 @@ mod test {
         assert_eq!(serialized, acctual);
     }//}}}
 }
+//}}}
