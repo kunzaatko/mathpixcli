@@ -1,15 +1,38 @@
 use base64::encode;
 use mime::{Mime, IMAGE_JPEG, IMAGE_PNG};
 use serde::{Serialize, Serializer};
+use std::convert::TryFrom;
 use std::path::PathBuf;
 
-#[derive(Debug)]
+const JPEG_EXTENSIONS: &'static [&'static str] = &["jpg", "jpeg", "jpe", "jif", "jfif", "jfi"];
+const PNG_EXTENSIONS: &'static [&'static str] = &["png"];
+
+#[derive(Debug, PartialEq)]
 pub struct Base64Image {
     img_path: PathBuf,
     img_mime: Mime,
 }
 
-impl ToString for Base64Image {
+impl TryFrom<PathBuf> for Base64Image {//{{{
+    type Error = String;
+    fn try_from(path: PathBuf) -> Result<Self, Self::Error> {
+        let extension = path
+            .extension()
+            .ok_or("Extension not found or no file passed".to_string())?;
+        let img_mime = match extension {
+            // FIX: error handling <22-05-21, kunzaatko> //
+            _ if JPEG_EXTENSIONS.contains(&extension.to_str().unwrap()) => IMAGE_JPEG,
+            _ if PNG_EXTENSIONS.contains(&extension.to_str().unwrap()) => IMAGE_PNG,
+            _ => return Err("Unsupported filetype. jpg and png images are supported.".to_string()),
+        };
+        return Ok(Base64Image{
+            img_path: path,
+            img_mime
+        });
+    }
+}//}}}
+
+impl ToString for Base64Image {//{{{
     fn to_string(&self) -> String {
         let mut string = "data:".to_string();
         string.push_str(&self.img_mime.to_string());
@@ -18,23 +41,36 @@ impl ToString for Base64Image {
         string.push_str(&encode(&std::fs::read(self.img_path.clone()).unwrap()));
         return string;
     }
-}
+}//}}}
 
-impl Serialize for Base64Image {
+impl Serialize for Base64Image {//{{{
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
         S: Serializer,
     {
         self.to_string().serialize(serializer)
     }
-}
+}//}}}
 
 // TESTS {{{
 #[cfg(test)]
 mod test {
+    use std::path::PathBuf;
     use super::Base64Image;
     use mime::IMAGE_JPEG;
     use serde_json::json;
+    use std::convert::TryInto;
+
+    #[test]
+    fn base64image_from_pathbuf() {
+        //{{{
+        let base64image: Base64Image = PathBuf::from("./test/assets/test_encode_base64.jpg".to_string()).try_into().unwrap();
+        let acctual = Base64Image {
+            img_path: "./test/assets/test_encode_base64.jpg".into(),
+            img_mime: IMAGE_JPEG,
+        };
+        assert_eq!(base64image, acctual);
+    } //}}}
 
     #[test]
     fn base64image_to_string() {

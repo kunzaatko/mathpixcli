@@ -98,7 +98,7 @@ struct CallBack {
     post: Option<String>,
     /// Key value pairs of headers to make POST
     headers: Option<String>,
-    /// Sets values of `reply` field of callbakc response object (see callback response object)
+    /// Sets values of `reply` field of callback response object (see callback response object)
     reply: Option<String>,
 }
 //}}}
@@ -109,6 +109,9 @@ mod test {
     use super::{DataOptions, Src};
     use reqwest::Url;
     use serde_json::{json, Value::Null};
+    use super::Base64Image;
+    use std::path::PathBuf;
+    use std::convert::TryInto;
 
     #[test]
     fn serialize_src_url() {
@@ -117,6 +120,16 @@ mod test {
         let src = Src::Url(url);
         let serialized = serde_json::to_value(&src).unwrap();
         let acctual = json!("https://www.duckduckgo.com/");
+        assert_eq!(serialized, acctual);
+    } //}}}
+
+    #[test]
+    fn serialize_src_image() {
+        //{{{
+        let image: Base64Image = PathBuf::from("./test/assets/test_encode_base64.jpg".to_string()).try_into().unwrap();
+        let src = Src::Image(image);
+        let serialized = serde_json::to_value(&src).unwrap();
+        let acctual = json!("data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAMCAgICAgMCAgIDAwMDBAYEBAQEBAgGBgUGCQgKCgkICQkKDA8MCgsOCwkJDRENDg8QEBEQCgwSExIQEw8QEBD/wAALCAACAAIBAREA/8QAFAABAAAAAAAAAAAAAAAAAAAACP/EABwQAAEFAQEBAAAAAAAAAAAAAAIBAwQFBgcIAP/aAAgBAQAAPwBfeevPXAt7wLmm63XD+f6PSaPH01tcXFtmYUydZTpEJp1+TIfdbJx55xwzM3DJSIiUlVVVV+//2Q==");
         assert_eq!(serialized, acctual);
     } //}}}
 
