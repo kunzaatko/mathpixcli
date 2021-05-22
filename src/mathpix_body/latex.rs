@@ -1,4 +1,4 @@
-use super::{CallBack, MetaData, Region, Src};
+use super::{CallBack, MetaData, Src};
 use serde::Serialize;
 
 #[derive(Serialize, Debug)]
@@ -98,10 +98,21 @@ enum Transforms {
 }
 // }}}
 
+// Region {{{
+#[derive(Debug, Serialize)]
+struct Region {
+    top_left_x: Option<u32>,
+    top_left_y: Option<u32>,
+    width: Option<u32>,
+    height: Option<u32>,
+}
+//}}}
+
 // TESTS {{{
 #[cfg(test)]
 mod test {
-    use super::{FormatOptions, LaTeXFormats, Ocr, PostLaTeX, Transforms};
+    use super::{FormatOptions, LaTeXFormats, Ocr, PostLaTeX, Region, Src, Transforms};
+    use reqwest::Url;
     use serde_json::{json, Value::Null};
 
     #[test]
@@ -158,5 +169,93 @@ mod test {
         });
         assert_eq!(serialized, expected);
     } //}}}
+
+    #[test]
+    fn serialize_region() {
+        //{{{
+        let region = Region {
+            top_left_x: Some(42),
+            top_left_y: None,
+            width: Some(40),
+            height: Some(50),
+        };
+        let serialized = serde_json::to_value(region).unwrap();
+        let expected = json!({
+            "top_left_x": 42,
+            "top_left_y": Null,
+            "width": 40,
+            "height": 50,
+        });
+        assert_eq!(serialized, expected);
+    } //}}}
+
+    #[test]
+    fn serialize_post_latex() {
+        let url = Url::parse("https://www.duckduckgo.com/").unwrap();
+        let src = Src::Url(url);
+        let formats = vec![
+            LaTeXFormats::AsciiMath,
+            LaTeXFormats::LaTeXNormal,
+            LaTeXFormats::LaTeXStyled,
+            LaTeXFormats::Text,
+            LaTeXFormats::Wolfram,
+        ];
+        let ocr = Some(vec![Ocr::Math, Ocr::Text]);
+        let format_options = Some(FormatOptions {
+            transforms: Some(vec![Transforms::RmNewlines, Transforms::RmStyleSyms]),
+            displaymath_delims: None,
+            math_delims: Some(vec!["\\(".to_string(), "\\)".to_string()]),
+        });
+        let region = Some(Region {
+            top_left_x: None,
+            top_left_y: Some(40),
+            width: Some(42),
+            height: Some(666),
+        });
+
+        let post_latex = PostLaTeX {
+            src,
+            formats,
+            ocr,
+            format_options,
+            skip_recrop: Some(false),
+            confidence_threshold: Some(1.0),
+            beam_size: Some(4),
+            n_best: Some(3),
+            region,
+            callback: None,
+            metadata: None,
+            include_detected_alphabets: Some(true),
+            auto_rotate_confidence_threshold: Some(0.5),
+        };
+
+        let serialized = serde_json::to_value(&post_latex).unwrap();
+
+        let expected = json!({
+            "src": "https://www.duckduckgo.com/",
+            "formats" : ["asciimath", "latex_normal", "latex_styled", "text", "wolfram"],
+            "ocr": ["math", "text"],
+            "format_options": {
+                "transforms": ["rm_newlines", "rm_style_syms"],
+                "displaymath_delims": Null,
+                "math_delims": ["\\(", "\\)"],
+            },
+            "skip_recrop" : false,
+            "confidence_threshold" : 1.0,
+            "beam_size": 4,
+            "n_best": 3,
+            "region": {
+                "top_left_x": Null,
+                "top_left_y": 40,
+                "width": 42,
+                "height": 666,
+            },
+            "callback": Null,
+            "metadata": Null,
+            "include_detected_alphabets": true,
+            "auto_rotate_confidence_threshold": 0.5,
+        });
+        assert_eq!(serialized,expected);
+    }
 }
 // }}}

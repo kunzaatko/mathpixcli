@@ -67,17 +67,6 @@ struct DataOptions {
 }
 //}}}
 
-
-// Region {{{
-#[derive(Debug, Serialize)]
-struct Region {
-    top_left_x: Option<u32>,
-    top_left_y: Option<u32>,
-    width: Option<u32>,
-    height: Option<u32>,
-}
-//}}}
-
 // CallBack {{{
 #[derive(Debug, Serialize)]
 struct CallBack {
