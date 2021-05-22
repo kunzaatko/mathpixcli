@@ -20,6 +20,7 @@ pub struct PostText {
     auto_rotate_confidence_threshold: Option<f32>,
     rm_spaces: Option<bool>,
     rm_fonts: Option<bool>,
+    idiomatic_eqn_arrays: Option<bool>,
     numbers_default_to_math: Option<bool>,
 }
 
@@ -272,6 +273,7 @@ mod test {
             include_word_data: Some(false),
             rm_fonts: Some(true),
             rm_spaces: Some(false),
+            idiomatic_eqn_arrays: Some(true),
             numbers_default_to_math: None,
         };
         let serialized = serde_json::to_value(&post_text).unwrap();
@@ -306,6 +308,7 @@ mod test {
             "include_word_data": false,
             "rm_fonts": true,
             "rm_spaces": false,
+            "idiomatic_eqn_arrays": true,
             "numbers_default_to_math": Null,
         });
         assert_eq!(serialized, expected);
