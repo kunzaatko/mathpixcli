@@ -26,18 +26,30 @@ pub enum MathpixPost {
 // this will be very usefull: https://serde.rs/container-attrs.html#into
 // TODO: Serialize should be implemented manually to convert pictures to base64 Strings and urls
 // to standard Strings <22-05-21, kunzaatko> //
-#[derive(Debug, Serialize)]
+// Src {{{
+#[derive(Debug)]
 enum Src {
     Image(Base64Image),
-    #[serde(serialize_with = "ser_url_as_string")]
     Url(Url),
 }
+
+impl Serialize for Src {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer {
+        match self {
+            Src::Image(img) => img.serialize(serializer),
+            Src::Url(url) => url.to_string().serialize(serializer),
+        }
+    }
+
+}//}}}
 
 fn ser_url_as_string<S>(url: &Url, ser: S) -> Result<S::Ok, S::Error>
 where
     S: Serializer,
 {
-    todo!();
+    url.to_string().serialize(ser)
 }
 
 // TODO: Ask mathpix what are the possibilities for MetaData <14-05-21, kunzaatko> //
@@ -97,3 +109,19 @@ struct CallBack {
     reply: Option<String>,
 }
 //}}}
+
+#[cfg(test)]
+mod test {
+    use super::Src;
+    use reqwest::Url;
+    use serde_json::json;
+
+    #[test]
+    fn serialize_src_url() {
+        let url = Url::parse("https://www.duckduckgo.com/").unwrap();
+        let src = Src::Url(url);
+        let serialized = serde_json::to_value(&src).unwrap();
+        let acctual = json!("https://www.duckduckgo.com/");
+        assert_eq!(serialized, acctual);
+    }
+}
