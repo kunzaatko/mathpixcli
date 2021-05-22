@@ -5,8 +5,6 @@ use serde::Serialize;
 pub struct PostText {
     src: Src,
     metadata: Option<MetaData>,
-    // TODO: This should instead be a list of enums that specifies the allowed formats.
-    // Formats type should be implemented in super. <01-05-21, kunzaatko> //
     formats: Option<Vec<TextFormats>>,
     data_options: Option<DataOptions>,
     include_detected_alphabets: Option<bool>,
@@ -36,9 +34,10 @@ enum TextFormats {
     Html,
     /// Data extracte from `html` as specified in the `data_options` request parameter
     Data,
-    /// Styled Latex, returned only in cases that the whole image can be reduces to a single
+    /// Styled LaTeX, returned only in cases that the whole image can be reduces to a single
     /// equation
-    LatexStyled,
+    #[serde(rename = "latex_styled")]
+    LaTeXStyled,
 }
 
 impl ToString for TextFormats {
@@ -47,7 +46,7 @@ impl ToString for TextFormats {
             TextFormats::Text => "text".to_string(),
             TextFormats::Html => "html".to_string(),
             TextFormats::Data => "data".to_string(),
-            TextFormats::LatexStyled => "latex_styled".to_string(),
+            TextFormats::LaTeXStyled => "latex_styled".to_string(),
         }
     }
 }
@@ -230,7 +229,7 @@ mod test {
             TextFormats::Text,
             TextFormats::Html,
             TextFormats::Data,
-            TextFormats::LatexStyled,
+            TextFormats::LaTeXStyled,
         ];
         let serialized = serde_json::to_value(&text_formats).unwrap();
         let expected = json!(["text", "html", "data", "latex_styled"]);
@@ -239,6 +238,7 @@ mod test {
 
     #[test]
     fn serialize_text_post() {
+        //{{{
         let image: Base64Image = PathBuf::from("./test/assets/test_encode_base64.jpg".to_string())
             .try_into()
             .unwrap();
@@ -309,6 +309,6 @@ mod test {
             "numbers_default_to_math": Null,
         });
         assert_eq!(serialized, expected);
-    }
+    } //}}}
 }
 //}}}
