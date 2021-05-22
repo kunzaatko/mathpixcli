@@ -1,4 +1,4 @@
-use super::{CallBack, FormatOptions, MetaData, Region, Src};
+use super::{CallBack, MetaData, Region, Src};
 use serde::Serialize;
 
 #[derive(Serialize, Debug)]
@@ -65,10 +65,43 @@ enum Ocr {
 }
 // }}}
 
+// FormatOptions {{{
+#[derive(Debug, Serialize)]
+struct FormatOptions {
+    /// Array of transformation names
+    transforms: Option<Vec<Transforms>>,
+    // TODO: Add the constraint of ony two stings supplied <14-05-21, kunzaatko> //
+    /// [begin, end] delimiters for math mode (for example ["\(","\)"])
+    math_delims: Option<Vec<String>>,
+    // TODO: Add the constraint of ony two stings supplied <14-05-21, kunzaatko> //
+    /// [begin, end] delimiters for displaymath mode (for example ["\(","\)"])
+    displaymath_delims: Option<Vec<String>>,
+}
+//}}}
+
+// Transforms {{{
+#[derive(Debug, Serialize)]
+#[serde(rename_all = "snake_case")]
+enum Transforms {
+    /// Omit spaces around LaTeX groups and other places where spaces are superfluous
+    RmSpaces,
+    /// Uses spaces instead of newlines between text lines in paragraphs
+    RmNewlines,
+    ///	Omit mathbb, mathbf, mathcal, and mathrm commands
+    RmFonts,
+    /// Replace styled commands with unstyled versions, e.g., bigoplus becomes oplus
+    RmStyleSyms,
+    ///	Omit text to the left or right of math
+    RmText,
+    /// Convert longdiv to frac
+    LongFrac,
+}
+// }}}
+
 // TESTS {{{
 #[cfg(test)]
 mod test {
-    use super::{LaTeXFormats, Ocr, PostLaTeX};
+    use super::{FormatOptions, LaTeXFormats, Ocr, PostLaTeX, Transforms};
     use serde_json::{json, Value::Null};
 
     #[test]
@@ -106,6 +139,23 @@ mod test {
         let ocr = vec![Ocr::Math, Ocr::Text];
         let serialized = serde_json::to_value(&ocr).unwrap();
         let expected = json!(["math", "text"]);
+        assert_eq!(serialized, expected);
+    } //}}}
+
+    #[test]
+    fn serialize_format_options() {
+        //{{{
+        let format_options = FormatOptions {
+            transforms: Some(vec![Transforms::RmSpaces, Transforms::RmFonts]),
+            displaymath_delims: Some(vec!["\\[".to_string(), "\\]".to_string()]),
+            math_delims: None,
+        };
+        let serialized = serde_json::to_value(&format_options).unwrap();
+        let expected = json!({
+            "transforms": ["rm_spaces","rm_fonts"],
+            "displaymath_delims" : ["\\[", "\\]"],
+            "math_delims" : Null
+        });
         assert_eq!(serialized, expected);
     } //}}}
 }

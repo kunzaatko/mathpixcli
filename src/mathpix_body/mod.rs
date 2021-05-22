@@ -67,19 +67,6 @@ struct DataOptions {
 }
 //}}}
 
-// FormatOptions {{{
-#[derive(Debug, Serialize)]
-struct FormatOptions {
-    /// Array of transformation names
-    transforms: Vec<String>,
-    // TODO: Add the constraint of ony two stings supplied <14-05-21, kunzaatko> //
-    /// [begin, end] delimiters for math mode (for example ["\(","\)"])
-    math_delims: Vec<String>,
-    // TODO: Add the constraint of ony two stings supplied <14-05-21, kunzaatko> //
-    /// [begin, end] delimiters for displaymath mode (for example ["\(","\)"])
-    dispaymath_delims: Vec<String>,
-}
-//}}}
 
 // Region {{{
 #[derive(Debug, Serialize)]
