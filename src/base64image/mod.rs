@@ -3,7 +3,6 @@ use mime::{Mime, IMAGE_JPEG, IMAGE_PNG};
 use serde::{Serialize, Serializer};
 use std::path::PathBuf;
 
-// TODO: This should implement a custom serialize that convets the image into a base64 string <22-05-21, kunzaatko> //
 #[derive(Debug)]
 pub struct Base64Image {
     img_path: PathBuf,
@@ -27,5 +26,21 @@ impl Serialize for Base64Image {
         S: Serializer,
     {
         self.to_string().serialize(serializer)
+    }
+}
+
+#[cfg(test)]
+mod test {
+    use super::Base64Image;
+    use mime::IMAGE_JPEG;
+
+    #[test]
+    fn base64image_to_string() {
+        let base64image = Base64Image {
+            img_path: "./test/assets/test_encode_base64.jpg".into(),
+            img_mime: IMAGE_JPEG,
+        };
+        let string = "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAMCAgICAgMCAgIDAwMDBAYEBAQEBAgGBgUGCQgKCgkICQkKDA8MCgsOCwkJDRENDg8QEBEQCgwSExIQEw8QEBD/wAALCAACAAIBAREA/8QAFAABAAAAAAAAAAAAAAAAAAAACP/EABwQAAEFAQEBAAAAAAAAAAAAAAIBAwQFBgcIAP/aAAgBAQAAPwBfeevPXAt7wLmm63XD+f6PSaPH01tcXFtmYUydZTpEJp1+TIfdbJx55xwzM3DJSIiUlVVVV+//2Q==".to_string();
+        assert_eq!(base64image.to_string(), string);
     }
 }
