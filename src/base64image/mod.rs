@@ -7,7 +7,18 @@ use std::path::PathBuf;
 #[derive(Debug)]
 pub struct Base64Image {
     img_path: PathBuf,
-    img_type: Mime,
+    img_mime: Mime,
+}
+
+impl ToString for Base64Image {
+    fn to_string(&self) -> String {
+        let mut string = "data:".to_string();
+        string.push_str(&self.img_mime.to_string());
+        string.push_str(";base64,");
+        // PERF: Why does this clone need to be here? <22-05-21, kunzaatko> //
+        string.push_str(&encode(&std::fs::read(self.img_path.clone()).unwrap()));
+        return string;
+    }
 }
 
 impl Serialize for Base64Image {
@@ -15,6 +26,6 @@ impl Serialize for Base64Image {
     where
         S: Serializer,
     {
-        todo!();
+        self.to_string().serialize(serializer)
     }
 }
