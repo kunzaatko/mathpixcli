@@ -36,14 +36,14 @@ enum Src {
 impl Serialize for Src {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
-        S: Serializer {
+        S: Serializer,
+    {
         match self {
             Src::Image(img) => img.serialize(serializer),
             Src::Url(url) => url.to_string().serialize(serializer),
         }
     }
-
-}//}}}
+} //}}}
 
 // TODO: Ask mathpix what are the possibilities for MetaData <14-05-21, kunzaatko> //
 #[derive(Debug, Serialize)]
@@ -105,16 +105,40 @@ struct CallBack {
 
 #[cfg(test)]
 mod test {
-    use super::Src;
+    use super::{DataOptions, Src};
     use reqwest::Url;
-    use serde_json::json;
+    use serde_json::{json, Value::Null};
 
     #[test]
     fn serialize_src_url() {
+        //{{{
         let url = Url::parse("https://www.duckduckgo.com/").unwrap();
         let src = Src::Url(url);
         let serialized = serde_json::to_value(&src).unwrap();
         let acctual = json!("https://www.duckduckgo.com/");
         assert_eq!(serialized, acctual);
-    }
+    } //}}}
+
+    #[test]
+    fn serialize_data_options() {
+        //{{{
+        let data_options = DataOptions{
+            include_asciimath : Some(true),
+            include_latex : Some(false),
+            include_mathml  : None,
+            include_svg : None,
+            include_table_html : None,
+            include_tsv : None,
+        };
+        let serialized = serde_json::to_value(&data_options).unwrap();
+        let acctual = json!({
+            "include_asciimath" : true,
+            "include_latex" : false,
+            "include_mathml"  : Null,
+            "include_svg" : Null,
+            "include_table_html" : Null,
+            "include_tsv" : Null,
+        });
+        assert_eq!(serialized, acctual);
+    }//}}}
 }

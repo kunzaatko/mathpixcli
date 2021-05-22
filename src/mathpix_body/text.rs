@@ -227,7 +227,8 @@ mod test {
     } //}}}
 
     #[test]
-    fn serialize_text_formats() {//{{{
+    fn serialize_text_formats() {
+        //{{{
         let text_formats: Vec<TextFormats> = vec![
             TextFormats::Text,
             TextFormats::Html,
@@ -237,6 +238,6 @@ mod test {
         let serialized = serde_json::to_value(&text_formats).unwrap();
         let acctual = json!(["text", "html", "data", "latex_styled"]);
         assert_eq!(serialized, acctual);
-    }//}}}
+    } //}}}
 }
 //}}}
