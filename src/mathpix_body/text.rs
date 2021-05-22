@@ -19,7 +19,7 @@ pub struct PostText {
     include_inchi: Option<bool>,
     include_geometry_data: Option<bool>,
     // TODO: Add the num bounded trait (is between 0 and 1) <30-04-21, kunzaatko> //
-    auto_rotate_confidence_threchold: Option<f32>,
+    auto_rotate_confidence_threshold: Option<f32>,
     rm_spaces: Option<bool>,
     rm_fonts: Option<bool>,
     numbers_default_to_math: Option<bool>,
@@ -134,8 +134,11 @@ impl AlphabetsAllowed {
 // TESTS {{{
 #[cfg(test)]
 mod test {
-    use super::{AlphabetsAllowed, TextFormats};
-    use serde_json::json;
+    use super::super::Base64Image;
+    use super::{AlphabetsAllowed, DataOptions, PostText, Src, TextFormats};
+    use serde_json::{json, Value::Null};
+    use std::convert::TryInto;
+    use std::path::PathBuf;
 
     #[test]
     fn alphabets_allow() {
@@ -144,18 +147,16 @@ mod test {
         alphabets
             .allow(vec!["en".to_string(), "ru".to_string()])
             .unwrap();
-        assert_eq!(
-            alphabets,
-            AlphabetsAllowed {
-                en: Some(true),
-                ru: Some(true),
-                hi: None,
-                ja: None,
-                ko: None,
-                th: None,
-                zh: None,
-            }
-        )
+        let expected = AlphabetsAllowed {
+            en: Some(true),
+            ru: Some(true),
+            hi: None,
+            ja: None,
+            ko: None,
+            th: None,
+            zh: None,
+        };
+        assert_eq!(alphabets, expected)
     } //}}}
 
     #[test]
@@ -165,18 +166,16 @@ mod test {
         alphabets
             .disallow(vec!["en".to_string(), "ru".to_string()])
             .unwrap();
-        assert_eq!(
-            alphabets,
-            AlphabetsAllowed {
-                en: Some(false),
-                ru: Some(false),
-                hi: None,
-                ja: None,
-                ko: None,
-                th: None,
-                zh: None,
-            }
-        )
+        let expected = AlphabetsAllowed {
+            en: Some(false),
+            ru: Some(false),
+            hi: None,
+            ja: None,
+            ko: None,
+            th: None,
+            zh: None,
+        };
+        assert_eq!(alphabets, expected);
     } //}}}
 
     #[test]
@@ -189,18 +188,16 @@ mod test {
         alphabets
             .allow(vec!["en".to_string(), "hi".to_string()])
             .unwrap();
-        assert_eq!(
-            alphabets,
-            AlphabetsAllowed {
-                en: Some(true),
-                ru: Some(false),
-                hi: Some(true),
-                ja: None,
-                ko: None,
-                th: None,
-                zh: None,
-            }
-        )
+        let expected = AlphabetsAllowed {
+            en: Some(true),
+            ru: Some(false),
+            hi: Some(true),
+            ja: None,
+            ko: None,
+            th: None,
+            zh: None,
+        };
+        assert_eq!(alphabets, expected)
     } //}}}
 
     #[test]
@@ -214,16 +211,16 @@ mod test {
             .allow(vec!["en".to_string(), "hi".to_string()])
             .unwrap();
         let serialized = serde_json::to_value(&alphabets).unwrap();
-        let acctual = json!({
+        let expected = json!({
                 "en": true,
                 "ru": false,
                 "hi": true,
-                "ja": serde_json::Value::Null,
-                "ko": serde_json::Value::Null,
-                "th": serde_json::Value::Null,
-                "zh": serde_json::Value::Null,
+                "ja": Null,
+                "ko": Null,
+                "th": Null,
+                "zh": Null,
         });
-        assert_eq!(acctual, serialized);
+        assert_eq!(expected, serialized);
     } //}}}
 
     #[test]
@@ -236,8 +233,82 @@ mod test {
             TextFormats::LatexStyled,
         ];
         let serialized = serde_json::to_value(&text_formats).unwrap();
-        let acctual = json!(["text", "html", "data", "latex_styled"]);
-        assert_eq!(serialized, acctual);
+        let expected = json!(["text", "html", "data", "latex_styled"]);
+        assert_eq!(serialized, expected);
     } //}}}
+
+    #[test]
+    fn serialize_text_post() {
+        let image: Base64Image = PathBuf::from("./test/assets/test_encode_base64.jpg".to_string())
+            .try_into()
+            .unwrap();
+        let mut alphabets_allowed = AlphabetsAllowed::new();
+        alphabets_allowed
+            .allow(vec!["ru".to_string(), "en".to_string()])
+            .unwrap();
+        let data_options = DataOptions {
+            include_asciimath: Some(true),
+            include_latex: Some(false),
+            include_mathml: None,
+            include_svg: None,
+            include_table_html: None,
+            include_tsv: None,
+        };
+        let src = Src::Image(image);
+
+        let post_text = PostText {
+            src,
+            metadata: None,
+            formats: Some(vec![TextFormats::Text, TextFormats::Data]),
+            alphabets_allowed: Some(alphabets_allowed),
+            auto_rotate_confidence_threshold: Some(1.),
+            confidence_threshold: Some(1.),
+            data_options: Some(data_options),
+            include_detected_alphabets: Some(true),
+            include_geometry_data: Some(false),
+            include_inchi: Some(true),
+            include_line_data: Some(false),
+            include_smiles: Some(true),
+            include_word_data: Some(false),
+            rm_fonts: Some(true),
+            rm_spaces: Some(false),
+            numbers_default_to_math: None,
+        };
+        let serialized = serde_json::to_value(&post_text).unwrap();
+        let expected = json!({
+            "src" : "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAMCAgICAgMCAgIDAwMDBAYEBAQEBAgGBgUGCQgKCgkICQkKDA8MCgsOCwkJDRENDg8QEBEQCgwSExIQEw8QEBD/wAALCAACAAIBAREA/8QAFAABAAAAAAAAAAAAAAAAAAAACP/EABwQAAEFAQEBAAAAAAAAAAAAAAIBAwQFBgcIAP/aAAgBAQAAPwBfeevPXAt7wLmm63XD+f6PSaPH01tcXFtmYUydZTpEJp1+TIfdbJx55xwzM3DJSIiUlVVVV+//2Q==",
+            "metadata": Null,
+            "formats": ["text", "data"],
+            "alphabets_allowed": {
+                "en" : true,
+                "ru" : true,
+                "hi" : Null,
+                "zh" : Null,
+                "ja" : Null,
+                "ko" : Null,
+                "th" : Null,
+            },
+            "auto_rotate_confidence_threshold": 1.,
+            "confidence_threshold": 1.,
+            "data_options": {
+                "include_asciimath": true,
+                "include_latex": false,
+                "include_mathml": Null,
+                "include_svg": Null,
+                "include_table_html": Null,
+                "include_tsv": Null,
+            },
+            "include_detected_alphabets": true,
+            "include_geometry_data": false,
+            "include_inchi": true,
+            "include_line_data": false,
+            "include_smiles": true,
+            "include_word_data": false,
+            "rm_fonts": true,
+            "rm_spaces": false,
+            "numbers_default_to_math": Null,
+        });
+        assert_eq!(serialized, expected);
+    }
 }
 //}}}
