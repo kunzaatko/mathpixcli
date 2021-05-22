@@ -45,13 +45,6 @@ impl Serialize for Src {
 
 }//}}}
 
-fn ser_url_as_string<S>(url: &Url, ser: S) -> Result<S::Ok, S::Error>
-where
-    S: Serializer,
-{
-    url.to_string().serialize(ser)
-}
-
 // TODO: Ask mathpix what are the possibilities for MetaData <14-05-21, kunzaatko> //
 #[derive(Debug, Serialize)]
 struct MetaData {}
