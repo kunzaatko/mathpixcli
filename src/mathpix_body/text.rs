@@ -134,7 +134,7 @@ impl AlphabetsAllowed {
 // TESTS {{{
 #[cfg(test)]
 mod test {
-    use super::AlphabetsAllowed;
+    use super::{AlphabetsAllowed, TextFormats};
     use serde_json::json;
 
     #[test]
@@ -204,7 +204,8 @@ mod test {
     } //}}}
 
     #[test]
-    fn alphabets_serialization() {
+    fn serialize_alphabets() {
+        //{{{
         let mut alphabets = AlphabetsAllowed::new();
         alphabets
             .disallow(vec!["en".to_string(), "ru".to_string()])
@@ -223,6 +224,19 @@ mod test {
                 "zh": serde_json::Value::Null,
         });
         assert_eq!(acctual, serialized);
-    }
+    } //}}}
+
+    #[test]
+    fn serialize_text_formats() {//{{{
+        let text_formats: Vec<TextFormats> = vec![
+            TextFormats::Text,
+            TextFormats::Html,
+            TextFormats::Data,
+            TextFormats::LatexStyled,
+        ];
+        let serialized = serde_json::to_value(&text_formats).unwrap();
+        let acctual = json!(["text", "html", "data", "latex_styled"]);
+        assert_eq!(serialized, acctual);
+    }//}}}
 }
 //}}}
