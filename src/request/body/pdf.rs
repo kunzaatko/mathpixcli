@@ -28,11 +28,11 @@ mod test {
     use serde_json::json;
 
     #[test]
-    fn serialize_postpdf() {
-        let postpdf = PDFBody {
+    fn serialize_pdfbody() {
+        let pdf_body = PDFBody {
             url: Url::parse("https://www.duckduckgo.com/").unwrap(),
         };
-        let serilized = serde_json::to_value(postpdf).unwrap();
+        let serilized = serde_json::to_value(pdf_body).unwrap();
         let expected = json!({
             "url" : "https://www.duckduckgo.com/"
         });

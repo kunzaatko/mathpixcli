@@ -206,6 +206,7 @@ mod test {
 
     #[test]
     fn serialize_latexbody() {
+        //{{{
         let url = Url::parse("https://www.duckduckgo.com/").unwrap();
         let src = Src::Url(url);
         let formats = vec![
@@ -228,7 +229,7 @@ mod test {
             height: Some(666),
         });
 
-        let post_latex = LaTeXBody {
+        let latex_body = LaTeXBody {
             src,
             formats,
             ocr,
@@ -244,7 +245,7 @@ mod test {
             auto_rotate_confidence_threshold: Some(0.5),
         };
 
-        let serialized = serde_json::to_value(&post_latex).unwrap();
+        let serialized = serde_json::to_value(&latex_body).unwrap();
 
         let expected = json!({
             "src": "https://www.duckduckgo.com/",
@@ -271,6 +272,6 @@ mod test {
             "auto_rotate_confidence_threshold": 0.5,
         });
         assert_eq!(serialized, expected);
-    }
+    } //}}}
 }
 // }}}
