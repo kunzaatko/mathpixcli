@@ -255,7 +255,7 @@ mod test {
             "include_detected_alphabets": true,
             "auto_rotate_confidence_threshold": 0.5,
         });
-        assert_eq!(serialized,expected);
+        assert_eq!(serialized, expected);
     }
 }
 // }}}

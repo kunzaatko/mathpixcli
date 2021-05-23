@@ -58,12 +58,12 @@ pub struct CallBack {
 // TESTS {{{
 #[cfg(test)]
 mod test {
+    use super::Base64Image;
     use super::{DataOptions, Src};
     use reqwest::Url;
     use serde_json::{json, Value::Null};
-    use super::Base64Image;
-    use std::path::PathBuf;
     use std::convert::TryInto;
+    use std::path::PathBuf;
 
     #[test]
     fn serialize_src_url() {
@@ -78,7 +78,9 @@ mod test {
     #[test]
     fn serialize_src_image() {
         //{{{
-        let image: Base64Image = PathBuf::from("./test/assets/test_encode_base64.jpg".to_string()).try_into().unwrap();
+        let image: Base64Image = PathBuf::from("./test/assets/test_encode_base64.jpg".to_string())
+            .try_into()
+            .unwrap();
         let src = Src::Image(image);
         let serialized = serde_json::to_value(&src).unwrap();
         let acctual = json!("data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAMCAgICAgMCAgIDAwMDBAYEBAQEBAgGBgUGCQgKCgkICQkKDA8MCgsOCwkJDRENDg8QEBEQCgwSExIQEw8QEBD/wAALCAACAAIBAREA/8QAFAABAAAAAAAAAAAAAAAAAAAACP/EABwQAAEFAQEBAAAAAAAAAAAAAAIBAwQFBgcIAP/aAAgBAQAAPwBfeevPXAt7wLmm63XD+f6PSaPH01tcXFtmYUydZTpEJp1+TIfdbJx55xwzM3DJSIiUlVVVV+//2Q==");
@@ -88,13 +90,13 @@ mod test {
     #[test]
     fn serialize_data_options() {
         //{{{
-        let data_options = DataOptions{
-            include_asciimath : Some(true),
-            include_latex : Some(false),
-            include_mathml  : None,
-            include_svg : None,
-            include_table_html : None,
-            include_tsv : None,
+        let data_options = DataOptions {
+            include_asciimath: Some(true),
+            include_latex: Some(false),
+            include_mathml: None,
+            include_svg: None,
+            include_table_html: None,
+            include_tsv: None,
         };
         let serialized = serde_json::to_value(&data_options).unwrap();
         let acctual = json!({
@@ -106,6 +108,6 @@ mod test {
             "include_tsv" : Null,
         });
         assert_eq!(serialized, acctual);
-    }//}}}
+    } //}}}
 }
 //}}}

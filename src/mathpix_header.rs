@@ -15,6 +15,7 @@ impl MathpixHeader {
 }
 
 impl TryFrom<MathpixHeader> for HeaderMap {
+    //{{{
     type Error = reqwest::header::InvalidHeaderValue;
 
     fn try_from(val: MathpixHeader) -> Result<Self, Self::Error> {
@@ -33,8 +34,9 @@ impl TryFrom<MathpixHeader> for HeaderMap {
 
         return Ok(map);
     }
-}
+} //}}}
 
+// TESTS {{{
 #[cfg(test)]
 mod tests {
     use super::MathpixHeader;
@@ -43,6 +45,7 @@ mod tests {
 
     #[test]
     fn try_from_mathpixheader() {
+        //{{{
         let header = MathpixHeader {
             app_id: "nevypustsupyven_gmail_com_24325g_26c684".to_owned(),
             app_key: "29f1253cb23b8se13fgd".to_owned(),
@@ -58,5 +61,5 @@ mod tests {
         {
             assert!(map[header_key] == header_val)
         }
-    }
-}
+    } //}}}
+} //}}}

@@ -13,7 +13,8 @@ pub struct Base64Image {
     img_mime: Mime,
 }
 
-impl TryFrom<PathBuf> for Base64Image {//{{{
+impl TryFrom<PathBuf> for Base64Image {
+    //{{{
     type Error = String;
     fn try_from(path: PathBuf) -> Result<Self, Self::Error> {
         let extension = path
@@ -25,14 +26,15 @@ impl TryFrom<PathBuf> for Base64Image {//{{{
             _ if PNG_EXTENSIONS.contains(&extension.to_str().unwrap()) => IMAGE_PNG,
             _ => return Err("Unsupported filetype. jpg and png images are supported.".to_string()),
         };
-        return Ok(Base64Image{
+        return Ok(Base64Image {
             img_path: path,
-            img_mime
+            img_mime,
         });
     }
-}//}}}
+} //}}}
 
-impl ToString for Base64Image {//{{{
+impl ToString for Base64Image {
+    //{{{
     fn to_string(&self) -> String {
         let mut string = "data:".to_string();
         string.push_str(&self.img_mime.to_string());
@@ -41,30 +43,34 @@ impl ToString for Base64Image {//{{{
         string.push_str(&encode(&std::fs::read(self.img_path.clone()).unwrap()));
         return string;
     }
-}//}}}
+} //}}}
 
-impl Serialize for Base64Image {//{{{
+impl Serialize for Base64Image {
+    //{{{
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
         S: Serializer,
     {
         self.to_string().serialize(serializer)
     }
-}//}}}
+} //}}}
 
 // TESTS {{{
 #[cfg(test)]
 mod test {
-    use std::path::PathBuf;
     use super::Base64Image;
     use mime::IMAGE_JPEG;
     use serde_json::json;
     use std::convert::TryInto;
+    use std::path::PathBuf;
 
     #[test]
     fn base64image_from_pathbuf() {
         //{{{
-        let base64image: Base64Image = PathBuf::from("./test/assets/test_encode_base64.jpg".to_string()).try_into().unwrap();
+        let base64image: Base64Image =
+            PathBuf::from("./test/assets/test_encode_base64.jpg".to_string())
+                .try_into()
+                .unwrap();
         let acctual = Base64Image {
             img_path: "./test/assets/test_encode_base64.jpg".into(),
             img_mime: IMAGE_JPEG,
