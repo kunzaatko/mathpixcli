@@ -1,6 +1,38 @@
-/// Common part of the URL for all the api requests
+//! This is a crate for creating [API](https://docs.mathpix.com/?shell#introduction) requests for Mathpix.
+//! `MathpixAPI` uses the `reqwest` crate for making the requests and `serde_json` for serializing the
+//! structure to `JSON`.
+//! ```text
+//! The MathpixOCR API is a JSON API for extracting text from images and digital ink
+//! inputs. Unlike other OCR API's, MathpixOCR has 1rst class support for scientific
+//! notation, as used in chemistry, math, physics, computer science, economics, and other
+//! STEM subjects.
+//!
+//! If you have any questions or problems, please send us an email at support@mathpix.com.
+//! ```
+// TODO: Add examples for making requests to different endpoints. <23-05-21, kunzaatko> //
+
+/// Common part of the URL for all the API endpoints
 pub const APIURL: &str = "https://api.mathpix.com/v3/";
 
-mod base64image;
-mod mathpix_body;
-mod mathpix_header;
+/// The body for the endpoints that the API provides all look different. This module implements a
+/// structure for every endpoint that adheres to what the enpoint expects to be the body of the
+/// request.
+pub mod mathpix_body;
+
+/// Module for creating the header of requests.
+/// ```text
+///  MathpixOCR uses API keys to allow access to the API. You can find your API keys on
+///  your account dashboard at https://accounts.mathpix.com/ocr-api.
+///
+///  MathpixOCR expects for the API key to be included in all API requests to the server
+///  via HTTP Basic Auth. Expected set of HTTP headers is shown on the right.
+/// ```
+///  The header structure that the API requires looks like this:
+///  ```json
+///  {
+///     "content-type": "application/json",
+///     "app_id": "YOUR_APP_ID",
+///     "app_key": "YOUR_APP_KEY"
+///  }
+///  ```
+pub mod mathpix_header;

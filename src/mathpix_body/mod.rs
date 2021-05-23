@@ -1,9 +1,9 @@
-mod batch;
-mod latex;
-mod pdf;
+pub mod batch;
+pub mod latex;
+pub mod pdf;
 mod shared_objects;
-mod strokes;
-mod text;
+pub mod strokes;
+pub mod text;
 
 use self::batch::PostBatch;
 use self::latex::PostLaTeX;

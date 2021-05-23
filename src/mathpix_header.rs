@@ -3,7 +3,8 @@ use reqwest::header::{HeaderMap, HeaderName, HeaderValue};
 use serde::Serialize;
 use std::convert::TryFrom;
 
-#[derive(Serialize)]
+#[derive(Serialize, Debug)]
+/// Struct storing the `"app_id"` and `"app_key"` for authentication when using the API.
 pub struct MathpixHeader {
     app_id: String,
     app_key: String,

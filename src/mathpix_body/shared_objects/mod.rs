@@ -1,6 +1,8 @@
-use super::super::base64image::Base64Image;
 use reqwest::Url;
 use serde::{Serialize, Serializer};
+
+pub mod base64image;
+pub use base64image::Base64Image;
 
 // Src {{{
 #[derive(Debug)]
