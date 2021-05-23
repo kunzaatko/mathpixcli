@@ -33,7 +33,7 @@ impl TryFrom<MathpixHeader> for HeaderMap {
         let app_key = HeaderValue::from_str(&val.app_key)?;
         map.insert(HeaderName::from_static("app_key"), app_key);
 
-        return Ok(map);
+        Ok(map)
     }
 } //}}}
 

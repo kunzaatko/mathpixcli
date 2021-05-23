@@ -24,16 +24,16 @@ pub struct PostLaTeX {
     // TODO: this should be bounded. It is from 1-beam_size. <01-05-21, kunzaatko> //
     /// Number of highest-confidence results to return (an integer 1-`beam_size`)
     pub n_best: Option<u8>,
-    ///	Specify the image area with the pixel coordinates `top_left_x`, `top_left_y`, `width`, and `height`
+    /// Specify the image area with the pixel coordinates `top_left_x`, `top_left_y`, `width`, and `height`
     pub region: Option<Region>,
     /// Callback request object
     pub callback: Option<CallBack>,
     /// Key value object
     pub metadata: Option<MetaData>,
-    ///	Return detected alphabets
+    /// Return detected alphabets
     pub include_detected_alphabets: Option<bool>,
     // TODO: bounded 0-1. <01-05-21, kunzaatko> //
-    ///	Specifies threshold for auto rotating image to correct orientation; by default it is set to `0.99`, can be disabled with a value of `1` (see [Auto rotation](https://docs.mathpix.com/?shell#auto-rotation) section for details)
+    /// Specifies threshold for auto rotating image to correct orientation; by default it is set to `0.99`, can be disabled with a value of `1` (see [Auto rotation](https://docs.mathpix.com/?shell#auto-rotation) section for details)
     pub auto_rotate_confidence_threshold: Option<f32>,
 } //}}}
 
@@ -102,11 +102,11 @@ pub enum Transforms {
     RmSpaces,
     /// Uses spaces instead of newlines between text lines in paragraphs
     RmNewlines,
-    ///	Omit mathbb, mathbf, mathcal, and mathrm commands
+    /// Omit mathbb, mathbf, mathcal, and mathrm commands
     RmFonts,
     /// Replace styled commands with unstyled versions, e.g., bigoplus becomes oplus
     RmStyleSyms,
-    ///	Omit text to the left or right of math
+    /// Omit text to the left or right of math
     RmText,
     /// Convert longdiv to frac
     LongFrac,

@@ -11,6 +11,8 @@
 //! ```
 // TODO: Add examples for making requests to different endpoints. <23-05-21, kunzaatko> //
 
+#![allow(clippy::upper_case_acronyms)]
+
 /// Common part of the URL for all the API endpoints
 pub const APIURL: &str = "https://api.mathpix.com/v3/";
 

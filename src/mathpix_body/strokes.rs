@@ -8,7 +8,7 @@ use serde_json::Value as JsonValue;
 pub struct PostStrokes {
     // NOTE: on construction, `is_array(&self)` should be used to check whether it is an array.
     // Also eltype should be Number (`is_number(&self)`)
-    ///	Strokes in JSON with appropriate format.
+    /// Strokes in JSON with appropriate format.
     pub strokes: JsonValue,
     /// Key value object
     pub metadata: Option<MetaData>,

@@ -4,8 +4,8 @@ use serde::{Serialize, Serializer};
 use std::convert::TryFrom;
 use std::path::PathBuf;
 
-const JPEG_EXTENSIONS: &'static [&'static str] = &["jpg", "jpeg", "jpe", "jif", "jfif", "jfi"];
-const PNG_EXTENSIONS: &'static [&'static str] = &["png"];
+const JPEG_EXTENSIONS: &[&str] = &["jpg", "jpeg", "jpe", "jif", "jfif", "jfi"];
+const PNG_EXTENSIONS: &[&str] = &["png"];
 
 #[derive(Debug, PartialEq)]
 pub struct Base64Image {
@@ -19,17 +19,17 @@ impl TryFrom<PathBuf> for Base64Image {
     fn try_from(path: PathBuf) -> Result<Self, Self::Error> {
         let extension = path
             .extension()
-            .ok_or("Extension not found or no file passed".to_string())?;
+            .ok_or_else(|| "Extension not found or no file passed".to_string())?;
         let img_mime = match extension {
             // FIX: error handling <22-05-21, kunzaatko> //
             _ if JPEG_EXTENSIONS.contains(&extension.to_str().unwrap()) => IMAGE_JPEG,
             _ if PNG_EXTENSIONS.contains(&extension.to_str().unwrap()) => IMAGE_PNG,
             _ => return Err("Unsupported filetype. jpg and png images are supported.".to_string()),
         };
-        return Ok(Base64Image {
+        Ok(Base64Image {
             img_path: path,
             img_mime,
-        });
+        })
     }
 } //}}}
 
@@ -41,7 +41,7 @@ impl ToString for Base64Image {
         string.push_str(";base64,");
         // PERF: Why does this clone need to be here? <22-05-21, kunzaatko> //
         string.push_str(&encode(&std::fs::read(self.img_path.clone()).unwrap()));
-        return string;
+        string
     }
 } //}}}
 
