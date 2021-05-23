@@ -3,11 +3,11 @@ use reqwest::header::{HeaderMap, HeaderName, HeaderValue};
 use serde::Serialize;
 use std::convert::TryFrom;
 
-#[derive(Serialize, Debug)]
+#[derive(Serialize, Debug, Clone)]
 /// Struct storing the `"app_id"` and `"app_key"` for authentication when using the API.
 pub struct Header {
-    app_id: String,
-    app_key: String,
+    pub app_id: String,
+    pub app_key: String,
 }
 
 impl Header {
