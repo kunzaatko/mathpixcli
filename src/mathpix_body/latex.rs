@@ -1,31 +1,46 @@
 use super::{CallBack, MetaData, Src};
 use serde::Serialize;
 
+// PostLaTeX {{{
 #[derive(Serialize, Debug)]
+/// This structs contains the possible items that the _latex_ endpoint accepts
 pub struct PostLaTeX {
-    src: Src,
-    formats: Vec<LaTeXFormats>,
-    ocr: Option<Vec<Ocr>>,
-    format_options: Option<FormatOptions>,
-    skip_recrop: Option<bool>,
+    /// Image data, or public URL where image is located
+    pub src: Src,
+    /// String postprocessing formats (see [Formatting](https://docs.mathpix.com/?shell#formatting-2) section)
+    pub formats: Vec<LaTeXFormats>,
+    /// Process only math `["math"]` or both math and text `["math", "text"]`
+    pub ocr: Option<Vec<Ocr>>,
+    /// Options for specific formats (see [Formatting](https://docs.mathpix.com/?shell#format-options) section)
+    pub format_options: Option<FormatOptions>,
+    /// Force algorithm to consider whole image
+    pub skip_recrop: Option<bool>,
     // TODO: bounded 0-1. <01-05-21, kunzaatko> //
-    confidence_threshold: Option<f32>,
+    /// Set threshold for triggering confidence errors
+    pub confidence_threshold: Option<f32>,
     // TODO: this should be bounded. It is from 1-5. <01-05-21, kunzaatko> //
-    beam_size: Option<u8>,
+    /// Number of results to consider during recognition (an integer 1-5)
+    pub beam_size: Option<u8>,
     // TODO: this should be bounded. It is from 1-beam_size. <01-05-21, kunzaatko> //
-    n_best: Option<u8>,
-    region: Option<Region>,
-    callback: Option<CallBack>,
-    metadata: Option<MetaData>,
-    include_detected_alphabets: Option<bool>,
+    /// Number of highest-confidence results to return (an integer 1-`beam_size`)
+    pub n_best: Option<u8>,
+    ///	Specify the image area with the pixel coordinates `top_left_x`, `top_left_y`, `width`, and `height`
+    pub region: Option<Region>,
+    /// Callback request object
+    pub callback: Option<CallBack>,
+    /// Key value object
+    pub metadata: Option<MetaData>,
+    ///	Return detected alphabets
+    pub include_detected_alphabets: Option<bool>,
     // TODO: bounded 0-1. <01-05-21, kunzaatko> //
-    auto_rotate_confidence_threshold: Option<f32>,
-}
+    ///	Specifies threshold for auto rotating image to correct orientation; by default it is set to `0.99`, can be disabled with a value of `1` (see [Auto rotation](https://docs.mathpix.com/?shell#auto-rotation) section for details)
+    pub auto_rotate_confidence_threshold: Option<f32>,
+}//}}}
 
 // LaTeXFormats {{{
 #[derive(Debug, Serialize)]
 #[serde(rename_all = "snake_case")]
-enum LaTeXFormats {
+pub enum LaTeXFormats {
     /// Text mode output, with math inside delimiters, eg. test \(x^2\), inline math by default
     Text,
     /// Same as text, except uses block mode math instead of inline mode when in doubt
@@ -57,7 +72,7 @@ enum LaTeXFormats {
 // TODO: Ask Mathpix if the math in mandatory in this field and there are only options "math" and ["math", "text"]. This would be implied by the docs. <22-05-21, kunzaatko> //
 #[derive(Debug, Serialize)]
 #[serde(rename_all = "snake_case")]
-enum Ocr {
+pub enum Ocr {
     /// Process math from the input
     Math,
     /// Process text from the image
@@ -67,22 +82,22 @@ enum Ocr {
 
 // FormatOptions {{{
 #[derive(Debug, Serialize)]
-struct FormatOptions {
+pub struct FormatOptions {
     /// Array of transformation names
-    transforms: Option<Vec<Transforms>>,
+    pub transforms: Option<Vec<Transforms>>,
     // TODO: Add the constraint of ony two stings supplied <14-05-21, kunzaatko> //
-    /// [begin, end] delimiters for math mode (for example ["\(","\)"])
-    math_delims: Option<Vec<String>>,
+    /// [begin, end] delimiters for math mode (for example `["\(","\)"]`)
+    pub math_delims: Option<Vec<String>>,
     // TODO: Add the constraint of ony two stings supplied <14-05-21, kunzaatko> //
-    /// [begin, end] delimiters for displaymath mode (for example ["\(","\)"])
-    displaymath_delims: Option<Vec<String>>,
+    /// [begin, end] delimiters for displaymath mode (for example `["\(","\)"]`)
+    pub displaymath_delims: Option<Vec<String>>,
 }
 //}}}
 
 // Transforms {{{
 #[derive(Debug, Serialize)]
 #[serde(rename_all = "snake_case")]
-enum Transforms {
+pub enum Transforms {
     /// Omit spaces around LaTeX groups and other places where spaces are superfluous
     RmSpaces,
     /// Uses spaces instead of newlines between text lines in paragraphs
@@ -100,11 +115,11 @@ enum Transforms {
 
 // Region {{{
 #[derive(Debug, Serialize)]
-struct Region {
-    top_left_x: Option<u32>,
-    top_left_y: Option<u32>,
-    width: Option<u32>,
-    height: Option<u32>,
+pub struct Region {
+    pub top_left_x: Option<u32>,
+    pub top_left_y: Option<u32>,
+    pub width: Option<u32>,
+    pub height: Option<u32>,
 }
 //}}}
 
