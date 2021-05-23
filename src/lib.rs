@@ -14,7 +14,7 @@
 #![allow(clippy::upper_case_acronyms)]
 
 /// Common part of the URL for all the API endpoints
-pub const APIURL: &str = "https://api.mathpix.com/v3/";
+pub const MATHPIX_APIURL: &str = "https://api.mathpix.com/v3/";
 
 /// The body for the endpoints that the API provides all look different. This module implements a
 /// structure for every endpoint that adheres to what the enpoint expects to be the body of the

@@ -1,5 +1,5 @@
 use reqwest::Url;
-use serde::{Serialize, Serializer};
+use serde::ser::{Serialize, SerializeStruct, Serializer};
 
 // PostPDF {{{
 #[derive(Debug)]
@@ -14,6 +14,29 @@ impl Serialize for PostPDF {
     where
         S: Serializer,
     {
-        self.url.to_string().serialize(serializer)
+        let mut state = serializer.serialize_struct("PostPDF", 1)?;
+        state.serialize_field("url", &self.url.to_string())?;
+        state.end()
     }
 } //}}}
+
+// TESTS {{{
+#[cfg(test)]
+mod test {
+    use super::PostPDF;
+    use reqwest::Url;
+    use serde_json::json;
+
+    #[test]
+    fn serialize_postpdf() {
+        let postpdf = PostPDF {
+            url: Url::parse("https://www.duckduckgo.com/").unwrap(),
+        };
+        let serilized = serde_json::to_value(postpdf).unwrap();
+        let expected = json!({
+            "url" : "https://www.duckduckgo.com/"
+        });
+        assert_eq!(serilized, expected);
+    }
+}
+// }}}
