@@ -74,8 +74,8 @@ struct AlphabetsAllowed {
     th: Option<bool>,
 }
 
-impl AlphabetsAllowed {
-    fn new() -> Self {
+impl Default for AlphabetsAllowed {
+    fn default() -> Self {
         AlphabetsAllowed {
             en: None,
             hi: None,
@@ -86,7 +86,9 @@ impl AlphabetsAllowed {
             th: None,
         }
     }
+}
 
+impl AlphabetsAllowed {
     fn disallow(&mut self, alphabets: Vec<String>) -> Result<(), String> {
         for alphabet in alphabets {
             match alphabet.as_str() {
@@ -143,7 +145,7 @@ mod test {
     #[test]
     fn alphabets_allow() {
         //{{{
-        let mut alphabets = AlphabetsAllowed::new();
+        let mut alphabets = AlphabetsAllowed::default();
         alphabets
             .allow(vec!["en".to_string(), "ru".to_string()])
             .unwrap();
@@ -162,7 +164,7 @@ mod test {
     #[test]
     fn alphabets_disallow() {
         //{{{
-        let mut alphabets = AlphabetsAllowed::new();
+        let mut alphabets = AlphabetsAllowed::default();
         alphabets
             .disallow(vec!["en".to_string(), "ru".to_string()])
             .unwrap();
@@ -181,7 +183,7 @@ mod test {
     #[test]
     fn alphabets_disallow_and_allow() {
         //{{{
-        let mut alphabets = AlphabetsAllowed::new();
+        let mut alphabets = AlphabetsAllowed::default();
         alphabets
             .disallow(vec!["en".to_string(), "ru".to_string()])
             .unwrap();
@@ -203,7 +205,7 @@ mod test {
     #[test]
     fn serialize_alphabets() {
         //{{{
-        let mut alphabets = AlphabetsAllowed::new();
+        let mut alphabets = AlphabetsAllowed::default();
         alphabets
             .disallow(vec!["en".to_string(), "ru".to_string()])
             .unwrap();
@@ -243,7 +245,7 @@ mod test {
         let image: Base64Image = PathBuf::from("./test/assets/test_encode_base64.jpg".to_string())
             .try_into()
             .unwrap();
-        let mut alphabets_allowed = AlphabetsAllowed::new();
+        let mut alphabets_allowed = AlphabetsAllowed::default();
         alphabets_allowed
             .allow(vec!["ru".to_string(), "en".to_string()])
             .unwrap();
