@@ -35,7 +35,7 @@ pub struct PostLaTeX {
     // TODO: bounded 0-1. <01-05-21, kunzaatko> //
     ///	Specifies threshold for auto rotating image to correct orientation; by default it is set to `0.99`, can be disabled with a value of `1` (see [Auto rotation](https://docs.mathpix.com/?shell#auto-rotation) section for details)
     pub auto_rotate_confidence_threshold: Option<f32>,
-}//}}}
+} //}}}
 
 // LaTeXFormats {{{
 #[derive(Debug, Serialize)]

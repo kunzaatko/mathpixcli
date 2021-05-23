@@ -109,7 +109,7 @@ impl Default for AlphabetsAllowed {
 }
 
 impl AlphabetsAllowed {
-    fn disallow(&mut self, alphabets: Vec<String>) -> Result<(), String> {
+    pub fn disallow(&mut self, alphabets: Vec<String>) -> Result<(), String> {
         for alphabet in alphabets {
             match alphabet.as_str() {
                 "en" => self.en = Some(false),
@@ -130,7 +130,7 @@ impl AlphabetsAllowed {
         Ok(())
     }
 
-    fn allow(&mut self, alphabets: Vec<String>) -> Result<(), String> {
+    pub fn allow(&mut self, alphabets: Vec<String>) -> Result<(), String> {
         for alphabet in alphabets {
             match alphabet.as_str() {
                 "en" => self.en = Some(true),

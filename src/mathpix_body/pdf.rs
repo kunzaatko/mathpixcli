@@ -16,4 +16,4 @@ impl Serialize for PostPDF {
     {
         self.url.to_string().serialize(serializer)
     }
-}//}}}
+} //}}}
