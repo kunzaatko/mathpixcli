@@ -23,3 +23,14 @@ pub mod body;
 ///  }
 ///  ```
 pub mod header;
+
+use header::Header;
+use body::Body;
+use serde::Serialize;
+
+#[derive(Debug,Serialize)]
+pub struct Request {
+    header: Header,
+    body: Body,
+}
+

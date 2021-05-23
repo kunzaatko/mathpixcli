@@ -5,26 +5,26 @@ use std::convert::TryFrom;
 
 #[derive(Serialize, Debug)]
 /// Struct storing the `"app_id"` and `"app_key"` for authentication when using the API.
-pub struct MathpixHeader {
+pub struct Header {
     app_id: String,
     app_key: String,
 }
 
-impl MathpixHeader {
+impl Header {
     const CONTENT_TYPE: Mime = APPLICATION_JSON;
     // TODO: Add function for adding values to HeaderMap without having to construct one <03-05-21, kunzaatko> //
 }
 
-impl TryFrom<MathpixHeader> for HeaderMap {
+impl TryFrom<Header> for HeaderMap {
     //{{{
     type Error = reqwest::header::InvalidHeaderValue;
 
-    fn try_from(val: MathpixHeader) -> Result<Self, Self::Error> {
+    fn try_from(val: Header) -> Result<Self, Self::Error> {
         let mut map = HeaderMap::with_capacity(3);
 
         map.insert(
             HeaderName::from_static("content-type"),
-            HeaderValue::from_str(MathpixHeader::CONTENT_TYPE.essence_str()).unwrap(), // essence_str of APPLICATION_JSON is "application/json"
+            HeaderValue::from_str(Header::CONTENT_TYPE.essence_str()).unwrap(), // essence_str of APPLICATION_JSON is "application/json"
         );
 
         let app_id = HeaderValue::from_str(&val.app_id)?;
@@ -40,14 +40,14 @@ impl TryFrom<MathpixHeader> for HeaderMap {
 // TESTS {{{
 #[cfg(test)]
 mod tests {
-    use super::MathpixHeader;
+    use super::Header;
     use reqwest::header::{HeaderMap, HeaderValue};
     use std::convert::TryFrom;
 
     #[test]
-    fn try_from_mathpixheader() {
+    fn try_from_header() {
         //{{{
-        let header = MathpixHeader {
+        let header = Header {
             app_id: "nevypustsupyven_gmail_com_24325g_26c684".to_owned(),
             app_key: "29f1253cb23b8se13fgd".to_owned(),
         };

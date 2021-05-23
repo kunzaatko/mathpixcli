@@ -1,10 +1,10 @@
-use super::{DataOptions, MetaData, Src};
+pub use super::shared_objects::{Base64Image, DataOptions, MetaData, Src};
 use serde::Serialize;
 
-// PostText{{{
+// TextBody {{{
 #[derive(Serialize, Debug)]
 /// This structs contains the possible items that the _text_ endpoint accepts
-pub struct PostText {
+pub struct TextBody {
     /// Image data, or public URL where image is located
     pub src: Src,
     /// Key value object
@@ -157,7 +157,7 @@ impl AlphabetsAllowed {
 #[cfg(test)]
 mod test {
     use super::super::shared_objects::Base64Image;
-    use super::{AlphabetsAllowed, DataOptions, PostText, Src, TextFormats};
+    use super::{AlphabetsAllowed, DataOptions, Src, TextBody, TextFormats};
     use serde_json::{json, Value::Null};
     use std::convert::TryInto;
     use std::path::PathBuf;
@@ -260,7 +260,7 @@ mod test {
     } //}}}
 
     #[test]
-    fn serialize_text_post() {
+    fn serialize_textbody() {
         //{{{
         let image: Base64Image = PathBuf::from("./test/assets/test_encode_base64.jpg".to_string())
             .try_into()
@@ -279,7 +279,7 @@ mod test {
         };
         let src = Src::Image(image);
 
-        let post_text = PostText {
+        let text_body = TextBody {
             src,
             metadata: None,
             formats: Some(vec![TextFormats::Text, TextFormats::Data]),
@@ -298,7 +298,7 @@ mod test {
             rm_spaces: Some(false),
             numbers_default_to_math: None,
         };
-        let serialized = serde_json::to_value(&post_text).unwrap();
+        let serialized = serde_json::to_value(&text_body).unwrap();
         let expected = json!({
             "src" : "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAMCAgICAgMCAgIDAwMDBAYEBAQEBAgGBgUGCQgKCgkICQkKDA8MCgsOCwkJDRENDg8QEBEQCgwSExIQEw8QEBD/wAALCAACAAIBAREA/8QAFAABAAAAAAAAAAAAAAAAAAAACP/EABwQAAEFAQEBAAAAAAAAAAAAAAIBAwQFBgcIAP/aAAgBAQAAPwBfeevPXAt7wLmm63XD+f6PSaPH01tcXFtmYUydZTpEJp1+TIfdbJx55xwzM3DJSIiUlVVVV+//2Q==",
             "metadata": Null,

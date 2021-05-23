@@ -1,10 +1,10 @@
 use super::{CallBack, MetaData, Src};
 use serde::Serialize;
 
-// PostLaTeX {{{
+// LaTeXBody {{{
 #[derive(Serialize, Debug)]
 /// This structs contains the possible items that the _latex_ endpoint accepts
-pub struct PostLaTeX {
+pub struct LaTeXBody {
     /// Image data, or public URL where image is located
     pub src: Src,
     /// String postprocessing formats (see [Formatting](https://docs.mathpix.com/?shell#formatting-2) section)
@@ -126,7 +126,7 @@ pub struct Region {
 // TESTS {{{
 #[cfg(test)]
 mod test {
-    use super::{FormatOptions, LaTeXFormats, Ocr, PostLaTeX, Region, Src, Transforms};
+    use super::{FormatOptions, LaTeXBody, LaTeXFormats, Ocr, Region, Src, Transforms};
     use reqwest::Url;
     use serde_json::{json, Value::Null};
 
@@ -205,7 +205,7 @@ mod test {
     } //}}}
 
     #[test]
-    fn serialize_post_latex() {
+    fn serialize_latexbody() {
         let url = Url::parse("https://www.duckduckgo.com/").unwrap();
         let src = Src::Url(url);
         let formats = vec![
@@ -228,7 +228,7 @@ mod test {
             height: Some(666),
         });
 
-        let post_latex = PostLaTeX {
+        let post_latex = LaTeXBody {
             src,
             formats,
             ocr,

@@ -1,15 +1,15 @@
 use reqwest::Url;
 use serde::ser::{Serialize, SerializeStruct, Serializer};
 
-// PostPDF {{{
+// PDFBody {{{
 #[derive(Debug)]
 /// This structs contains the possible items that the _text_ endpoint accepts
-pub struct PostPDF {
+pub struct PDFBody {
     /// HTTP URL where PDF can be downloaded from
     pub url: Url,
 }
 
-impl Serialize for PostPDF {
+impl Serialize for PDFBody {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
         S: Serializer,
@@ -23,13 +23,13 @@ impl Serialize for PostPDF {
 // TESTS {{{
 #[cfg(test)]
 mod test {
-    use super::PostPDF;
+    use super::PDFBody;
     use reqwest::Url;
     use serde_json::json;
 
     #[test]
     fn serialize_postpdf() {
-        let postpdf = PostPDF {
+        let postpdf = PDFBody {
             url: Url::parse("https://www.duckduckgo.com/").unwrap(),
         };
         let serilized = serde_json::to_value(postpdf).unwrap();

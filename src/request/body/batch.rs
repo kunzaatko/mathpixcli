@@ -1,1 +1,4 @@
-pub struct PostBatch {}
+use serde::Serialize;
+
+#[derive(Debug, Serialize)]
+pub struct BatchBody {}

@@ -2,10 +2,10 @@ use super::{DataOptions, MetaData};
 use serde::Serialize;
 use serde_json::Value as JsonValue;
 
-// PostStrokes {{{
+// StrokesBody {{{
 #[derive(Serialize, Debug)]
 /// This structs contains the possible items that the _strokes_ endpoint accepts
-pub struct PostStrokes {
+pub struct StrokesBody {
     // NOTE: on construction, `is_array(&self)` should be used to check whether it is an array.
     // Also eltype should be Number (`is_number(&self)`)
     /// Strokes in JSON with appropriate format.
