@@ -88,7 +88,6 @@ pub mod text; //}}}
 /// `MetaData`, `DataOptions` and `CallBack` types.
 mod shared_objects;
 
-use self::shared_objects::{CallBack, DataOptions, MetaData, Src};
 use self::{
     batch::BatchBody, latex::LaTeXBody, pdf::PDFBody, strokes::StrokesBody, text::TextBody,
 };

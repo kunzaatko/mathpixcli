@@ -1,4 +1,4 @@
-use super::{DataOptions, MetaData};
+pub use super::shared_objects::{DataOptions, MetaData};
 use serde::Serialize;
 use serde_json::Value as JsonValue;
 
