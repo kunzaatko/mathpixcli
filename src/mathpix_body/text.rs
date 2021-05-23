@@ -134,7 +134,7 @@ impl AlphabetsAllowed {
 // TESTS {{{
 #[cfg(test)]
 mod test {
-    use super::super::Base64Image;
+    use crate::base64image::Base64Image;
     use super::{AlphabetsAllowed, DataOptions, PostText, Src, TextFormats};
     use serde_json::{json, Value::Null};
     use std::convert::TryInto;
