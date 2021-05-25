@@ -3,8 +3,7 @@ pub use super::shared_objects::{
 };
 use serde::Deserialize;
 
-
-#[derive(Debug,Deserialize)]
+#[derive(Debug, Deserialize)]
 pub struct ResponseText {
     pub request_id: String,
     pub text: Option<String>,

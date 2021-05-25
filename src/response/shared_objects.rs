@@ -158,7 +158,7 @@ mod test {
             text: None,
         };
         let deserialized: LineData = serde_json::from_value(response).unwrap();
-        assert_eq!(deserialized,expected);
+        assert_eq!(deserialized, expected);
     }
 }
 // }}}
