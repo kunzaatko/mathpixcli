@@ -116,7 +116,7 @@ mod test {
     use super::Body::Text;
     use super::{
         text::AlphabetsAllowed, text::Base64Image, text::DataOptions, text::Src, text::TextBody,
-        text::TextFormats,
+        text::TextBodyOptions, text::TextFormats,
     };
     use serde_json::{json, Value::Null};
     use std::convert::TryInto;
@@ -141,8 +141,7 @@ mod test {
         };
         let src = Src::Image(image);
 
-        let text_body = TextBody {
-            src,
+        let text_body_opts = TextBodyOptions {
             metadata: None,
             formats: Some(vec![TextFormats::Text, TextFormats::Data]),
             alphabets_allowed: Some(alphabets_allowed),
@@ -159,6 +158,10 @@ mod test {
             rm_fonts: Some(true),
             rm_spaces: Some(false),
             numbers_default_to_math: None,
+        };
+        let text_body = TextBody {
+            src,
+            options: text_body_opts,
         };
         let body = Text(text_body);
         let serialized = serde_json::to_value(&body).unwrap();

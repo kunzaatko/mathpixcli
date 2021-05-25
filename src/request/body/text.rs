@@ -7,6 +7,14 @@ use serde::Serialize;
 pub struct TextBody {
     /// Image data, or public URL where image is located
     pub src: Src,
+    /// Configuration options for the _text_ endpoint
+    #[serde(flatten)]
+    pub options: TextBodyOptions,
+} //}}}
+
+// TextBodyOptions {{{
+#[derive(Serialize, Debug)]
+pub struct TextBodyOptions {
     /// Key value object
     pub metadata: Option<MetaData>,
     /// List of formats, one of `text`, `data`, `html`, `latex_styled`, see [Format Descriptions](https://docs.mathpix.com/?shell#format-descriptions)
@@ -42,7 +50,31 @@ pub struct TextBody {
     pub rm_fonts: Option<bool>,
     /// Specifies whether numbers are always math, e.g., `Answer: \( 17 \)` instead of `Answer: 17`. Default is `false`.
     pub numbers_default_to_math: Option<bool>,
-} //}}}
+}
+
+impl Default for TextBodyOptions {
+    fn default() -> Self {
+        TextBodyOptions {
+            metadata: None,
+            formats: None,
+            data_options: None,
+            include_detected_alphabets: None,
+            alphabets_allowed: None,
+            confidence_threshold: None,
+            confidence_rate_threshold: None,
+            include_line_data: None,
+            include_word_data: None,
+            include_smiles: None,
+            include_inchi: None,
+            include_geometry_data: None,
+            auto_rotate_confidence_threshold: None,
+            rm_spaces: None,
+            rm_fonts: None,
+            numbers_default_to_math: None,
+        }
+    }
+}
+// }}}
 
 // TextFormats {{{
 /// Format specifications possible for the _text_ endpoint
@@ -157,7 +189,7 @@ impl AlphabetsAllowed {
 #[cfg(test)]
 mod test {
     use super::super::shared_objects::Base64Image;
-    use super::{AlphabetsAllowed, DataOptions, Src, TextBody, TextFormats};
+    use super::{AlphabetsAllowed, DataOptions, Src, TextBody, TextBodyOptions, TextFormats};
     use serde_json::{json, Value::Null};
     use std::convert::TryInto;
     use std::path::PathBuf;
@@ -279,8 +311,7 @@ mod test {
         };
         let src = Src::Image(image);
 
-        let text_body = TextBody {
-            src,
+        let text_body_opts = TextBodyOptions {
             metadata: None,
             formats: Some(vec![TextFormats::Text, TextFormats::Data]),
             alphabets_allowed: Some(alphabets_allowed),
@@ -297,6 +328,11 @@ mod test {
             rm_fonts: Some(true),
             rm_spaces: Some(false),
             numbers_default_to_math: None,
+        };
+
+        let text_body = TextBody {
+            src,
+            options: text_body_opts,
         };
         let serialized = serde_json::to_value(&text_body).unwrap();
         let expected = json!({

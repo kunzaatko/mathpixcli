@@ -10,10 +10,30 @@ pub struct StrokesBody {
     // Also eltype should be Number (`is_number(&self)`)
     /// Strokes in JSON with appropriate format.
     pub strokes: JsonValue,
+    /// Configuration options for the _strokes_ endpoint
+    #[serde(flatten)]
+    pub options: StrokesBodyOptions,
+}
+// }}}
+
+// StrokesBodyOptions {{{
+#[derive(Serialize, Debug)]
+pub struct StrokesBodyOptions {
     /// Key value object
     pub metadata: Option<MetaData>,
     /// List of formats, one of `text`, `data`, `html`
     pub formats: Option<Vec<String>>,
     /// see [DataOptions](https://docs.mathpix.com/?shell#dataoptions-object) section above, specifies outputs for `data` and `html` return fields
     pub data_options: Option<DataOptions>,
-} //}}}
+}
+
+impl Default for StrokesBodyOptions {
+    fn default() -> Self {
+        StrokesBodyOptions {
+            metadata: None,
+            formats: None,
+            data_options: None,
+        }
+    }
+}
+//}}}

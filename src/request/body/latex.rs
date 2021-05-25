@@ -9,6 +9,14 @@ pub struct LaTeXBody {
     pub src: Src,
     /// String postprocessing formats (see [Formatting](https://docs.mathpix.com/?shell#formatting-2) section)
     pub formats: Vec<LaTeXFormats>,
+    /// Configuration options for the _latex_ endpoint
+    #[serde(flatten)]
+    pub options: LaTeXBodyOptions,
+} //}}}
+
+// LaTeXBodyOptions {{{
+#[derive(Debug, Serialize)]
+pub struct LaTeXBodyOptions {
     /// Process only math `["math"]` or both math and text `["math", "text"]`
     pub ocr: Option<Vec<Ocr>>,
     /// Options for specific formats (see [Formatting](https://docs.mathpix.com/?shell#format-options) section)
@@ -35,7 +43,26 @@ pub struct LaTeXBody {
     // TODO: bounded 0-1. <01-05-21, kunzaatko> //
     /// Specifies threshold for auto rotating image to correct orientation; by default it is set to `0.99`, can be disabled with a value of `1` (see [Auto rotation](https://docs.mathpix.com/?shell#auto-rotation) section for details)
     pub auto_rotate_confidence_threshold: Option<f32>,
-} //}}}
+}
+
+impl Default for LaTeXBodyOptions {
+    fn default() -> Self {
+        LaTeXBodyOptions {
+            ocr: None,
+            format_options: None,
+            skip_recrop: None,
+            confidence_threshold: None,
+            beam_size: None,
+            n_best: None,
+            region: None,
+            callback: None,
+            metadata: None,
+            include_detected_alphabets: None,
+            auto_rotate_confidence_threshold: None,
+        }
+    }
+}
+// }}}
 
 // LaTeXFormats {{{
 #[derive(Debug, Serialize)]
@@ -126,7 +153,7 @@ pub struct Region {
 // TESTS {{{
 #[cfg(test)]
 mod test {
-    use super::{FormatOptions, LaTeXBody, LaTeXFormats, Ocr, Region, Src, Transforms};
+    use super::*;
     use reqwest::Url;
     use serde_json::{json, Value::Null};
 
@@ -229,9 +256,7 @@ mod test {
             height: Some(666),
         });
 
-        let latex_body = LaTeXBody {
-            src,
-            formats,
+        let latex_body_opts = LaTeXBodyOptions {
             ocr,
             format_options,
             skip_recrop: Some(false),
@@ -245,6 +270,11 @@ mod test {
             auto_rotate_confidence_threshold: Some(0.5),
         };
 
+        let latex_body = LaTeXBody {
+            src,
+            formats,
+            options: latex_body_opts,
+        };
         let serialized = serde_json::to_value(&latex_body).unwrap();
 
         let expected = json!({

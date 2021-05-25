@@ -70,7 +70,7 @@ impl Request {
 // TESTS {{{
 #[cfg(test)]
 mod test {
-    use super::body::text::{self, TextBody};
+    use super::body::text::{self, TextBody, TextBodyOptions};
     use super::{Body, Header, Request};
     use std::convert::TryInto;
     use std::path::PathBuf;
@@ -95,8 +95,7 @@ mod test {
         };
         let src = text::Src::Image(image);
 
-        let text_body = TextBody {
-            src,
+        let text_body_opts = TextBodyOptions {
             metadata: None,
             formats: Some(vec![text::TextFormats::Text, text::TextFormats::Data]),
             alphabets_allowed: Some(alphabets_allowed),
@@ -113,6 +112,10 @@ mod test {
             rm_fonts: Some(true),
             rm_spaces: Some(false),
             numbers_default_to_math: None,
+        };
+        let text_body = TextBody {
+            src,
+            options: text_body_opts,
         };
         let body = Body::Text(text_body);
         let header = Header {
