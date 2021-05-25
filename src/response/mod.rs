@@ -7,3 +7,5 @@ pub mod pdf;
 pub mod strokes;
 
 pub mod text;
+
+mod shared_objects;
