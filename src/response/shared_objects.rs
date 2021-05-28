@@ -54,7 +54,7 @@ pub struct WordData {
 /// Data objects allow extracting relevant data from an OCR result.
 #[derive(Debug, Deserialize, PartialEq)]
 pub struct Data {
-    /// string 	one of `asciimath`, `mathml`, `latex`, `html`, `svg`, `tsv`
+    /// one of `asciimath`, `mathml`, `latex`, `html`, `svg`, `tsv`
     pub r#type: String,
     /// value corresponding to `type`
     pub value: String,
@@ -96,7 +96,7 @@ pub struct Position {}
 
 #[derive(Debug, Deserialize)]
 pub struct ShapeData {
-    ///	Type of diagram; currently only `triangle` is supported
+    /// Type of diagram; currently only `triangle` is supported
     r#type: String,
     /// List of [VertexData](https://docs.mathpix.com/?shell#geometry-objects) objects
     vertex_list: Vec<VertexData>,

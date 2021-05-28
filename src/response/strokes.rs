@@ -1,5 +1,6 @@
 pub use super::shared_objects::Data;
 use serde::Deserialize;
+
 // pub struct ResponseStrokes {{{
 #[derive(Debug, Deserialize)]
 pub struct ResponseStrokes {
