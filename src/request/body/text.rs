@@ -292,6 +292,25 @@ mod test {
     } //}}}
 
     #[test]
+    fn to_string_text_formats() {
+        //{{{
+        let text_formats: Vec<TextFormats> = vec![
+            TextFormats::Text,
+            TextFormats::Html,
+            TextFormats::Data,
+            TextFormats::LaTeXStyled,
+        ];
+        let text_formats_text: Vec<String> = text_formats.iter().clone().map(|x| x.to_string()).collect();
+        let expected = vec![
+            "text".to_string(),
+            "html".to_string(),
+            "data".to_string(),
+            "latex_styled".to_string(),
+        ];
+        assert_eq!(text_formats_text, expected);
+    } //}}}
+
+    #[test]
     fn serialize_textbody() {
         //{{{
         let image: Base64Image = PathBuf::from("./test/assets/test_encode_base64.jpg".to_string())
