@@ -300,7 +300,8 @@ mod test {
             TextFormats::Data,
             TextFormats::LaTeXStyled,
         ];
-        let text_formats_text: Vec<String> = text_formats.iter().clone().map(|x| x.to_string()).collect();
+        let text_formats_text: Vec<String> =
+            text_formats.iter().clone().map(|x| x.to_string()).collect();
         let expected = vec![
             "text".to_string(),
             "html".to_string(),
