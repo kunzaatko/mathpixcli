@@ -24,11 +24,11 @@ impl Serialize for Src {
 } //}}}
 
 // TODO: Ask mathpix what are the possibilities for MetaData <14-05-21, kunzaatko> //
-#[derive(Debug, Serialize)]
+#[derive(Debug, Serialize, PartialEq)]
 pub struct MetaData {}
 
 // DataOptions {{{
-#[derive(Debug, Serialize)]
+#[derive(Debug, Serialize, PartialEq)]
 pub struct DataOptions {
     /// Include math SVG in `html` and `data` formats
     pub include_svg: Option<bool>,
@@ -43,6 +43,29 @@ pub struct DataOptions {
     /// Include mathml in `data` and `html` outputs
     pub include_mathml: Option<bool>,
 }
+
+impl DataOptions {
+    field_builder![include_asciimath, bool];
+    field_builder![include_latex, bool];
+    field_builder![include_mathml, bool];
+    field_builder![include_svg, bool];
+    field_builder![include_table_html, bool];
+    field_builder![include_tsv, bool];
+}
+
+impl Default for DataOptions {
+    fn default() -> Self {
+        DataOptions {
+            include_asciimath: None,
+            include_latex: None,
+            include_mathml: None,
+            include_svg: None,
+            include_table_html: None,
+            include_tsv: None,
+        }
+    }
+}
+
 //}}}
 
 // CallBack {{{

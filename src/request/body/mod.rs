@@ -1,3 +1,13 @@
+#[macro_use]
+macro_rules! field_builder {
+    ($field_name: ident, $field_type: ty) => {
+        pub fn $field_name(&mut self, val: $field_type) -> &mut Self {
+            self.$field_name = Some(val);
+            self
+        }
+    };
+}
+
 // pub mod batch; {{{
 /// Module for constructing the _batch_ endpoint request
 /// ```text

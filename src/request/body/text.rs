@@ -13,7 +13,7 @@ pub struct TextBody {
 } //}}}
 
 // TextBodyOptions {{{
-#[derive(Serialize, Debug)]
+#[derive(Serialize, Debug, PartialEq)]
 pub struct TextBodyOptions {
     /// Key value object
     pub metadata: Option<MetaData>,
@@ -74,11 +74,72 @@ impl Default for TextBodyOptions {
         }
     }
 }
+
+macro_rules! data_option_add {
+    ($opt_name: ident) => {
+        pub fn $opt_name(&mut self, val: bool) -> &mut Self {
+            if let Some(data_options) = &mut (self.data_options) {
+                data_options.$opt_name = Some(val);
+            } else {
+                let mut data_options = DataOptions::default();
+                data_options.$opt_name(val);
+                self.data_options = Some(data_options);
+            }
+            self
+        }
+    };
+}
+
+impl TextBodyOptions {
+    field_builder![metadata, MetaData];
+    field_builder![formats, Vec<TextFormats>];
+
+    pub fn add_formats(&mut self, mut formats: Vec<TextFormats>) -> &mut Self {
+        if let Some(self_formats) = &mut (self.formats) {
+            self_formats.append(&mut formats);
+        } else {
+            self.formats = Some(formats);
+        }
+        self
+    }
+
+    pub fn format(&mut self, format: TextFormats) -> &mut Self {
+        if let Some(formats) = &mut (self.formats) {
+            formats.push(format);
+        } else {
+            self.formats = Some(vec![format]);
+        }
+        self
+    }
+
+    field_builder![data_options, DataOptions];
+
+    data_option_add![include_asciimath];
+    data_option_add![include_latex];
+    data_option_add![include_mathml];
+    data_option_add![include_svg];
+    data_option_add![include_table_html];
+    data_option_add![include_tsv];
+
+    field_builder![include_detected_alphabets, bool];
+    field_builder![alphabets_allowed, AlphabetsAllowed];
+    field_builder![confidence_threshold, f32];
+    field_builder![confidence_rate_threshold, f32];
+    field_builder![include_line_data, bool];
+    field_builder![include_word_data, bool];
+    field_builder![include_smiles, bool];
+    field_builder![include_inchi, bool];
+    field_builder![include_geometry_data, bool];
+    field_builder![auto_rotate_confidence_threshold, f32];
+    field_builder![rm_spaces, bool];
+    field_builder![rm_fonts, bool];
+    field_builder![numbers_default_to_math, bool];
+}
 // }}}
 
 // TextFormats {{{
 /// Format specifications possible for the _text_ endpoint
-#[derive(Debug, Serialize)]
+#[derive(Debug, Serialize, PartialEq)]
 #[serde(rename_all = "snake_case")]
 pub enum TextFormats {
     /// Mathpix markdown formatted text
@@ -390,6 +451,51 @@ mod test {
             "numbers_default_to_math": Null,
         });
         assert_eq!(serialized, expected);
+    } //}}}
+
+    #[test]
+    fn builder_textbodyoptions() {
+        //{{{
+        let mut alphabets = AlphabetsAllowed::default();
+        alphabets
+            .disallow(vec!["en".to_string(), "ru".to_string()])
+            .unwrap();
+        alphabets
+            .allow(vec!["en".to_string(), "hi".to_string()])
+            .unwrap();
+
+        let mut text_body_options = TextBodyOptions::default();
+        text_body_options
+            .alphabets_allowed(alphabets)
+            .confidence_rate_threshold(0.42)
+            .confidence_threshold(0.66);
+        let expected = TextBodyOptions {
+            metadata: None,
+            formats: None,
+            data_options: None,
+            alphabets_allowed: Some(AlphabetsAllowed {
+                en: Some(true),
+                ru: Some(false),
+                hi: Some(true),
+                ja: None,
+                ko: None,
+                th: None,
+                zh: None,
+            }),
+            include_detected_alphabets: None,
+            confidence_rate_threshold: Some(0.42),
+            confidence_threshold: Some(0.66),
+            include_line_data: None,
+            include_geometry_data: None,
+            include_inchi: None,
+            include_smiles: None,
+            include_word_data: None,
+            auto_rotate_confidence_threshold: None,
+            numbers_default_to_math: None,
+            rm_fonts: None,
+            rm_spaces: None,
+        };
+        assert_eq!(text_body_options, expected)
     } //}}}
 }
 //}}}
