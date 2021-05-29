@@ -211,13 +211,13 @@ fn main() {
             ArgGroup::new("Callback")
                 .arg("Post")
                 .arg("Headers")
-                .arg("Reply")
+                .arg("Reply"),
         )
         .arg(
             Arg::new("Post")
                 .long("post")
                 .about("URL where to post callback")
-                .value_name("URL")
+                .value_name("URL"),
         )
         // TODO: Make custom verification for having even number of arguments <29-05-21, kunzaatko> //
         // TODO: Make parsing of $date and $image and so on for the strings in headers <29-05-21, kunzaatko> //
@@ -227,7 +227,7 @@ fn main() {
                 .long("headers")
                 .about("Key value pairs of headers to make callback post")
                 .multiple(true)
-                .value_names(&["KEY", "VALUE"])
+                .value_names(&["KEY", "VALUE"]),
         )
         // TODO: What are the possible values for this <29-05-21, kunzaatko> //
         .arg(
@@ -235,9 +235,13 @@ fn main() {
                 .long("reply")
                 .about("Sets of values of `reply` field for callback object")
                 .multiple(true)
-                .value_name("VALUE")
+                .value_name("VALUE"),
         )
-    ;
+        .arg(
+            Arg::new("Include Detected Alphabets")
+                .long("include_detected_alphabets")
+                .about("Detected alphabets in the response"),
+        );
 
     // }}}
 
