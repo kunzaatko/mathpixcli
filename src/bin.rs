@@ -274,6 +274,24 @@ fn main() {
         .version(crate_version!())
         .author(crate_authors!())
         .about("Provides a command line interface for the Mathpix OCR API")
+        .arg(
+            // Header.app_id {{{
+            Arg::new("Header.app_id")
+                .long("id")
+                .env("MATHPIX_APP_ID")
+                .hide_env_values(true)
+                .about("API ID to use for the request header")
+                .value_name("ID")
+        )//}}}
+        .arg(
+            // Header.app_key {{{
+            Arg::new("Header.app_key")
+                .long("key")
+                .env("MATHPIX_APP_KEY")
+                .hide_env_values(true)
+                .about("API key to use for the request header")
+                .value_name("KEY")
+        )//}}}
         .subcommand(text_subcommand)
         .subcommand(latex_subcommand)
         .get_matches();
