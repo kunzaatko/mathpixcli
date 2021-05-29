@@ -1,6 +1,7 @@
 # TODO
 ## lib
 - trait for each process
+- use set instead of Vec in the bodies
 
 ## cli
 - config file

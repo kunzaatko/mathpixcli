@@ -28,7 +28,7 @@ impl Serialize for Src {
 pub struct MetaData {}
 
 // DataOptions {{{
-#[derive(Debug, Serialize, PartialEq)]
+#[derive(Debug, Serialize, PartialEq, Clone)]
 pub struct DataOptions {
     /// Include math SVG in `html` and `data` formats
     pub include_svg: Option<bool>,
@@ -133,6 +133,28 @@ mod test {
             "include_tsv" : Null,
         });
         assert_eq!(serialized, acctual);
+    } //}}}
+
+    #[test]
+    fn builder_data_options() {
+        //{{{
+        let mut data_options = DataOptions::default();
+        data_options
+            .include_asciimath(true)
+            .include_latex(true)
+            .include_mathml(true)
+            .include_svg(false)
+            .include_table_html(false)
+            .include_tsv(false);
+        let expected = DataOptions {
+            include_asciimath: Some(true),
+            include_latex: Some(true),
+            include_mathml: Some(true),
+            include_svg: Some(false),
+            include_table_html: Some(false),
+            include_tsv: Some(false),
+        };
+        assert_eq!(data_options, expected);
     } //}}}
 }
 //}}}

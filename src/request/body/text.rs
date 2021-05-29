@@ -139,7 +139,7 @@ impl TextBodyOptions {
 
 // TextFormats {{{
 /// Format specifications possible for the _text_ endpoint
-#[derive(Debug, Serialize, PartialEq)]
+#[derive(Debug, Serialize, PartialEq, Clone)]
 #[serde(rename_all = "snake_case")]
 pub enum TextFormats {
     /// Mathpix markdown formatted text
@@ -169,7 +169,7 @@ impl ToString for TextFormats {
 // AlphabetsAllowed {{{
 // NOTE: Serialization adds serde_json::Value::Null when None... This may not work with the API. A
 // test is needed. <21-05-21, kunzaatko> //
-#[derive(Debug, PartialEq, Serialize)]
+#[derive(Debug, PartialEq, Serialize, Clone)]
 pub struct AlphabetsAllowed {
     /// English
     pub en: Option<bool>,
@@ -454,48 +454,102 @@ mod test {
     } //}}}
 
     #[test]
-    fn builder_textbodyoptions() {
+    fn builder_text_body_options() {
         //{{{
-        let mut alphabets = AlphabetsAllowed::default();
-        alphabets
+        let mut alphabets_allowed = AlphabetsAllowed::default();
+        alphabets_allowed
             .disallow(vec!["en".to_string(), "ru".to_string()])
             .unwrap();
-        alphabets
+        alphabets_allowed
             .allow(vec!["en".to_string(), "hi".to_string()])
             .unwrap();
 
+        let mut data_options = DataOptions::default();
+        data_options
+            .include_asciimath(true)
+            .include_latex(true)
+            .include_mathml(true)
+            .include_svg(false)
+            .include_table_html(false)
+            .include_tsv(false);
+
+        let formats = vec![TextFormats::Text, TextFormats::LaTeXStyled];
+
         let mut text_body_options = TextBodyOptions::default();
         text_body_options
-            .alphabets_allowed(alphabets)
+            .alphabets_allowed(alphabets_allowed.clone())
             .confidence_rate_threshold(0.42)
-            .confidence_threshold(0.66);
+            .confidence_threshold(0.66)
+            .auto_rotate_confidence_threshold(0.13)
+            .data_options(data_options.clone())
+            .formats(formats.clone())
+            .include_detected_alphabets(true)
+            .numbers_default_to_math(false)
+            .rm_fonts(true)
+            .rm_spaces(false)
+            .include_line_data(false)
+            .include_geometry_data(false)
+            .include_inchi(false)
+            .include_smiles(false)
+            .include_word_data(false);
+
         let expected = TextBodyOptions {
             metadata: None,
-            formats: None,
-            data_options: None,
-            alphabets_allowed: Some(AlphabetsAllowed {
-                en: Some(true),
-                ru: Some(false),
-                hi: Some(true),
-                ja: None,
-                ko: None,
-                th: None,
-                zh: None,
-            }),
-            include_detected_alphabets: None,
+            formats: Some(formats),
+            data_options: Some(data_options),
+            alphabets_allowed: Some(alphabets_allowed),
+            include_detected_alphabets: Some(true),
             confidence_rate_threshold: Some(0.42),
             confidence_threshold: Some(0.66),
-            include_line_data: None,
-            include_geometry_data: None,
-            include_inchi: None,
-            include_smiles: None,
-            include_word_data: None,
-            auto_rotate_confidence_threshold: None,
-            numbers_default_to_math: None,
-            rm_fonts: None,
-            rm_spaces: None,
+            include_line_data: Some(false),
+            include_geometry_data: Some(false),
+            include_inchi: Some(false),
+            include_smiles: Some(false),
+            include_word_data: Some(false),
+            auto_rotate_confidence_threshold: Some(0.13),
+            numbers_default_to_math: Some(false),
+            rm_fonts: Some(true),
+            rm_spaces: Some(false),
         };
         assert_eq!(text_body_options, expected)
+    } //}}}
+
+    #[test]
+    fn builder_formats_text_body_options() {
+        //{{{
+        let mut text_body_options = TextBodyOptions::default();
+        text_body_options.format(TextFormats::Data);
+        text_body_options.add_formats(vec![TextFormats::LaTeXStyled, TextFormats::Html]);
+        let mut expected = TextBodyOptions::default();
+        expected.formats = Some(vec![
+            TextFormats::Data,
+            TextFormats::LaTeXStyled,
+            TextFormats::Html,
+        ]);
+        assert_eq!(text_body_options, expected);
+    } //}}}
+
+    #[test]
+    fn builder_data_options_text_body_options() {
+        //{{{
+        let mut text_body_options = TextBodyOptions::default();
+        text_body_options
+            .include_asciimath(true)
+            .include_latex(true)
+            .include_mathml(true)
+            .include_svg(true)
+            .include_table_html(true)
+            .include_tsv(true);
+        let mut expected = TextBodyOptions::default();
+        expected.data_options = Some(DataOptions {
+            include_asciimath: Some(true),
+            include_latex: Some(true),
+            include_mathml: Some(true),
+            include_svg: Some(true),
+            include_table_html: Some(true),
+            include_tsv: Some(true),
+        });
+        assert_eq!(text_body_options, expected);
     } //}}}
 }
 //}}}
