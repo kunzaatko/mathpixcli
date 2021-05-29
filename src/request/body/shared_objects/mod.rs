@@ -52,7 +52,7 @@ pub struct CallBack {
     post: Option<String>,
     /// Key value pairs of headers to make POST
     headers: Option<String>,
-    /// Sets values of `reply` field of callback response object (see callback response object)
+    /// Sets values of `reply` field of callback response object (see [callback response object](https://docs.mathpix.com/?shell#callback-response-object))
     reply: Option<String>,
 }
 //}}}
