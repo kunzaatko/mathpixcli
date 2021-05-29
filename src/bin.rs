@@ -5,14 +5,14 @@ use clap::{crate_authors, crate_version, App, Arg, ArgGroup};
 fn main() {
     // Text endpoint{{{
     let text_subcommand = App::new("text")
-                .about("Text endpoint for for the Mathpix API")
+                .about("Text endpoint for the Mathpix API")
                 .arg(
-                    // TextBodyOptions.text_formats {{{
-                    Arg::new("TextBodyOptions.text_formats")
+                    // TextBodyOptions.formats {{{
+                    Arg::new("TextBodyOptions.formats")
                         .short('f')
                         .long("format")
                         // TODO: What is the default <29-05-21, kunzaatko> //
-                        .about("List of formats required in the output")
+                        .about("list of formats required in the output")
                         .value_name("FORMAT")
                         .possible_values(&["text", "html", "data", "latex_styled", "all"])
                         .multiple(true)
@@ -23,11 +23,10 @@ fn main() {
                     Arg::new("TextBodyOptions.data_options")
                         .long("data_options")
                         // TODO: What is the default <29-05-21, kunzaatko> //
-                        .about("List of data options for the outputs")
+                        .about("list of data options for the outputs")
                         .value_name("OPTION")
                         .possible_values(&["include_svg", "include_table_html", "include_latex", "include_tsv", "include_acsiimath", "include_mathml", "all"])
                         .multiple(true)
-                        .takes_value(true),
                 )//}}}
                 .arg(
                     // TextBodyOptions.include_detected_alphabets {{{
@@ -109,14 +108,14 @@ fn main() {
 
     // LaTeX endpoint {{{
     let latex_subcommand = App::new("latex")
-        .about("LaTeX endpoint for for the Mathpix API")
+        .about("LaTeX endpoint for the Mathpix API")
         .arg(
             // LaTeXBodyOptions.format_options {{{
             Arg::new("LaTeXBodyOptions.formats")
                 .long("format")
                 .short('f')
                 // TODO: What is the default <29-05-21, kunzaatko> //
-                .about("List of formats required in the output")
+                .about("list of formats required in the output")
                 .value_name("FORMAT")
                 .possible_values(&[
                     "text",
@@ -270,6 +269,39 @@ fn main() {
         ); //}}}
            // }}}
 
+    // Strokes endpoint {{{
+    let strokes_subcommand = App::new("strokes")
+        .about("Strokes endpoint for the Mathpix API")
+        .arg(
+            // StrokesBodyOptions.formats {{{
+            Arg::new("StrokesBodyOptions.formats")
+                .long("format")
+                .short('f')
+                // TODO: What is the default <29-05-21, kunzaatko> //
+                .about("list of formats required in the output")
+                .value_name("FORMAT")
+                .possible_values(&["text", "data", "html", "all"])
+                .multiple(true),
+        ) //}}}
+        .arg(
+            // StrokesBodyOptions.data_options {{{
+            Arg::new("StrokesBodyOptions.data_options")
+                .long("data_options")
+                .about("list of data options for the outputs")
+                .value_name("OPTION")
+                .possible_values(&[
+                    "include_svg",
+                    "include_table_html",
+                    "include_latex",
+                    "include_tsv",
+                    "include_acsiimath",
+                    "include_mathml",
+                    "all",
+                ])
+                .multiple(true),
+        ); //}}}
+           //}}}
+
     let args = App::new("MathpixCLI")
         .version(crate_version!())
         .author(crate_authors!())
@@ -281,8 +313,8 @@ fn main() {
                 .env("MATHPIX_APP_ID")
                 .hide_env_values(true)
                 .about("API ID to use for the request header")
-                .value_name("ID")
-        )//}}}
+                .value_name("ID"),
+        ) //}}}
         .arg(
             // Header.app_key {{{
             Arg::new("Header.app_key")
@@ -290,9 +322,10 @@ fn main() {
                 .env("MATHPIX_APP_KEY")
                 .hide_env_values(true)
                 .about("API key to use for the request header")
-                .value_name("KEY")
-        )//}}}
+                .value_name("KEY"),
+        ) //}}}
         .subcommand(text_subcommand)
         .subcommand(latex_subcommand)
+        .subcommand(strokes_subcommand)
         .get_matches();
 }
