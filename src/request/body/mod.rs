@@ -1,4 +1,3 @@
-#[macro_use]
 macro_rules! field_builder {
     ($field_name: ident, $field_type: ty) => {
         pub fn $field_name(&mut self, val: $field_type) -> &mut Self {
