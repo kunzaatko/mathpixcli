@@ -15,7 +15,7 @@ pub struct LaTeXBody {
 } //}}}
 
 // LaTeXBodyOptions {{{
-#[derive(Debug, Serialize)]
+#[derive(Debug, Serialize, PartialEq)]
 pub struct LaTeXBodyOptions {
     /// Process only math `["math"]` or both math and text `["math", "text"]`
     pub ocr: Option<Vec<Ocr>>,
@@ -62,10 +62,24 @@ impl Default for LaTeXBodyOptions {
         }
     }
 }
+
+impl LaTeXBodyOptions {
+    field_builder![ocr, Vec<Ocr>];
+    field_builder![format_options, FormatOptions];
+    field_builder![skip_recrop, bool];
+    field_builder![confidence_threshold, f32];
+    field_builder![beam_size, u8];
+    field_builder![n_best, u8];
+    field_builder![region, Region];
+    field_builder![callback, CallBack];
+    field_builder![metadata, MetaData];
+    field_builder![include_detected_alphabets, bool];
+    field_builder![auto_rotate_confidence_threshold, f32];
+}
 // }}}
 
 // LaTeXFormats {{{
-#[derive(Debug, Serialize)]
+#[derive(Debug, Serialize, Clone)]
 #[serde(rename_all = "snake_case")]
 pub enum LaTeXFormats {
     /// Text mode output, with math inside delimiters, eg. test \(x^2\), inline math by default
@@ -97,7 +111,7 @@ pub enum LaTeXFormats {
 
 // Ocr {{{
 // TODO: Ask Mathpix if the math in mandatory in this field and there are only options "math" and ["math", "text"]. This would be implied by the docs. <22-05-21, kunzaatko> //
-#[derive(Debug, Serialize)]
+#[derive(Debug, Serialize, PartialEq, Clone)]
 #[serde(rename_all = "snake_case")]
 pub enum Ocr {
     /// Process math from the input
@@ -108,7 +122,7 @@ pub enum Ocr {
 // }}}
 
 // FormatOptions {{{
-#[derive(Debug, Serialize)]
+#[derive(Debug, Serialize, PartialEq, Clone)]
 pub struct FormatOptions {
     /// Array of transformation names
     pub transforms: Option<Vec<Transforms>>,
@@ -122,7 +136,7 @@ pub struct FormatOptions {
 //}}}
 
 // Transforms {{{
-#[derive(Debug, Serialize)]
+#[derive(Debug, Serialize, PartialEq, Clone)]
 #[serde(rename_all = "snake_case")]
 pub enum Transforms {
     /// Omit spaces around LaTeX groups and other places where spaces are superfluous
@@ -141,7 +155,7 @@ pub enum Transforms {
 // }}}
 
 // Region {{{
-#[derive(Debug, Serialize)]
+#[derive(Debug, Serialize, PartialEq, Clone)]
 pub struct Region {
     pub top_left_x: Option<u32>,
     pub top_left_y: Option<u32>,
@@ -302,6 +316,57 @@ mod test {
             "auto_rotate_confidence_threshold": 0.5,
         });
         assert_eq!(serialized, expected);
+    } //}}}
+
+    #[test]
+    fn builder_latex_body_options() {
+        //{{{
+        let format_options = FormatOptions {
+            transforms: Some(vec![Transforms::RmFonts, Transforms::RmNewlines]),
+            math_delims: Some(vec!["\\(".to_string(), "\\)".to_string()]),
+            displaymath_delims: None,
+        };
+
+        let callback = CallBack {
+            post: Some("https://duckduckgo.com/".to_string()),
+            headers: None,
+            reply: Some("Here is your reply".to_string()),
+        };
+
+        let region = Region {
+            top_left_x: Some(0),
+            top_left_y: Some(0),
+            width: Some(42),
+            height: Some(42),
+        };
+
+        let mut latex_body_options = LaTeXBodyOptions::default();
+        latex_body_options
+            .ocr(vec![Ocr::Math, Ocr::Text])
+            .format_options(format_options.clone())
+            .skip_recrop(true)
+            .confidence_threshold(0.42)
+            .beam_size(6)
+            .n_best(4)
+            .callback(callback.clone())
+            .metadata(MetaData {})
+            .include_detected_alphabets(true)
+            .auto_rotate_confidence_threshold(0.42)
+            .region(region.clone());
+        let expected = LaTeXBodyOptions {
+            ocr: Some(vec![Ocr::Math, Ocr::Text]),
+            format_options: Some(format_options),
+            skip_recrop: Some(true),
+            confidence_threshold: Some(0.42),
+            beam_size: Some(6),
+            callback: Some(callback),
+            auto_rotate_confidence_threshold: Some(0.42),
+            include_detected_alphabets: Some(true),
+            metadata: Some(MetaData {}),
+            n_best: Some(4),
+            region: Some(region),
+        };
+        assert_eq!(latex_body_options, expected);
     } //}}}
 }
 // }}}

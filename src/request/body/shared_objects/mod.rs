@@ -69,14 +69,14 @@ impl Default for DataOptions {
 //}}}
 
 // CallBack {{{
-#[derive(Debug, Serialize)]
+#[derive(Debug, Serialize, PartialEq, Clone)]
 pub struct CallBack {
     /// URL to which to make POST callback
-    post: Option<String>,
+    pub post: Option<String>,
     /// Key value pairs of headers to make POST
-    headers: Option<String>,
+    pub headers: Option<String>,
     /// Sets values of `reply` field of callback response object (see [callback response object](https://docs.mathpix.com/?shell#callback-response-object))
-    reply: Option<String>,
+    pub reply: Option<String>,
 }
 //}}}
 
