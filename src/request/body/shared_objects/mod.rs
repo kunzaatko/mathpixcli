@@ -4,21 +4,21 @@ use serde::{Serialize, Serializer};
 pub mod base64image;
 pub use base64image::Base64Image;
 
-// Src {{{
+// ImageSrc {{{
 #[derive(Debug)]
-pub enum Src {
+pub enum ImageSrc {
     Image(Base64Image),
     Url(Url),
 }
 
-impl Serialize for Src {
+impl Serialize for ImageSrc {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
         S: Serializer,
     {
         match self {
-            Src::Image(img) => img.serialize(serializer),
-            Src::Url(url) => url.to_string().serialize(serializer),
+            ImageSrc::Image(img) => img.serialize(serializer),
+            ImageSrc::Url(url) => url.to_string().serialize(serializer),
         }
     }
 } //}}}
@@ -80,11 +80,91 @@ pub struct CallBack {
 }
 //}}}
 
+// AlphabetsAllowed {{{
+// NOTE: Serialization adds serde_json::Value::Null when None... This may not work with the API. A
+// test is needed. <21-05-21, kunzaatko> //
+#[derive(Debug, PartialEq, Serialize, Clone)]
+pub struct AlphabetsAllowed {
+    /// English
+    pub en: Option<bool>,
+    /// Hindi Devangari
+    pub hi: Option<bool>,
+    /// Chinese
+    pub zh: Option<bool>,
+    /// Kana Hiragana or Katakana
+    pub ja: Option<bool>,
+    /// Hangul Jamo
+    pub ko: Option<bool>,
+    /// Russian
+    pub ru: Option<bool>,
+    /// Thai
+    pub th: Option<bool>,
+}
+
+impl Default for AlphabetsAllowed {
+    fn default() -> Self {
+        AlphabetsAllowed {
+            en: None,
+            hi: None,
+            zh: None,
+            ja: None,
+            ko: None,
+            ru: None,
+            th: None,
+        }
+    }
+}
+
+impl AlphabetsAllowed {
+    pub fn disallow(&mut self, alphabets: Vec<String>) -> Result<(), String> {
+        for alphabet in alphabets {
+            match alphabet.as_str() {
+                "en" => self.en = Some(false),
+                "hi" => self.hi = Some(false),
+                "zh" => self.zh = Some(false),
+                "ja" => self.ja = Some(false),
+                "ko" => self.ko = Some(false),
+                "ru" => self.ru = Some(false),
+                "th" => self.th = Some(false),
+                other => {
+                    return Err(format!(
+                    "UnknownAlphabet: {} is not in known alphabets (en, hi, zh, ja, ko, ru, th)",
+                    other
+                ))
+                }
+            }
+        }
+        Ok(())
+    }
+
+    pub fn allow(&mut self, alphabets: Vec<String>) -> Result<(), String> {
+        for alphabet in alphabets {
+            match alphabet.as_str() {
+                "en" => self.en = Some(true),
+                "hi" => self.hi = Some(true),
+                "zh" => self.zh = Some(true),
+                "ja" => self.ja = Some(true),
+                "ko" => self.ko = Some(true),
+                "ru" => self.ru = Some(true),
+                "th" => self.th = Some(true),
+                other => {
+                    return Err(format!(
+                    "UnknownAlphabet: {} is not in known alphabets (en, hi, zh, ja, ko, ru, th)",
+                    other
+                ))
+                }
+            }
+        }
+        Ok(())
+    }
+}
+// }}}
+
 // TESTS {{{
 #[cfg(test)]
 mod test {
     use super::Base64Image;
-    use super::{DataOptions, Src};
+    use super::{DataOptions, ImageSrc};
     use reqwest::Url;
     use serde_json::{json, Value::Null};
     use std::convert::TryInto;
@@ -94,7 +174,7 @@ mod test {
     fn serialize_src_url() {
         //{{{
         let url = Url::parse("https://www.duckduckgo.com/").unwrap();
-        let src = Src::Url(url);
+        let src = ImageSrc::Url(url);
         let serialized = serde_json::to_value(&src).unwrap();
         let acctual = json!("https://www.duckduckgo.com/");
         assert_eq!(serialized, acctual);
@@ -106,7 +186,7 @@ mod test {
         let image: Base64Image = PathBuf::from("./test/assets/test_encode_base64.jpg".to_string())
             .try_into()
             .unwrap();
-        let src = Src::Image(image);
+        let src = ImageSrc::Image(image);
         let serialized = serde_json::to_value(&src).unwrap();
         let acctual = json!("data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAMCAgICAgMCAgIDAwMDBAYEBAQEBAgGBgUGCQgKCgkICQkKDA8MCgsOCwkJDRENDg8QEBEQCgwSExIQEw8QEBD/wAALCAACAAIBAREA/8QAFAABAAAAAAAAAAAAAAAAAAAACP/EABwQAAEFAQEBAAAAAAAAAAAAAAIBAwQFBgcIAP/aAAgBAQAAPwBfeevPXAt7wLmm63XD+f6PSaPH01tcXFtmYUydZTpEJp1+TIfdbJx55xwzM3DJSIiUlVVVV+//2Q==");
         assert_eq!(serialized, acctual);

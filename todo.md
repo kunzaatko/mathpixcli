@@ -9,3 +9,5 @@
 - command aliases
 - different output when passed to xclip or to file
 - logging file for the outputs
+- flag for copying result to clipboard
+- defining substitutions for custom commands

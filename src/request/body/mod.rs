@@ -93,7 +93,7 @@ pub mod strokes; //}}}
 /// ```
 pub mod text; //}}}
 
-/// Object that are shared in multiple endpoints. Now consists of `Src` (and `Base64Image`),
+/// Object that are shared in multiple endpoints. Now consists of `ImageSrc` (and `Base64Image`),
 /// `MetaData`, `DataOptions` and `CallBack` types.
 mod shared_objects;
 
@@ -124,7 +124,7 @@ pub enum Body {
 mod test {
     use super::Body::Text;
     use super::{
-        text::AlphabetsAllowed, text::Base64Image, text::DataOptions, text::Src, text::TextBody,
+        text::AlphabetsAllowed, text::Base64Image, text::DataOptions, text::ImageSrc, text::TextBody,
         text::TextBodyOptions, text::TextFormats,
     };
     use serde_json::{json, Value::Null};
@@ -148,7 +148,7 @@ mod test {
             include_table_html: None,
             include_tsv: None,
         };
-        let src = Src::Image(image);
+        let src = ImageSrc::Image(image);
 
         let text_body_opts = TextBodyOptions {
             metadata: None,

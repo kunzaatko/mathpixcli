@@ -1,4 +1,4 @@
-pub use super::shared_objects::{CallBack, MetaData, Src};
+pub use super::shared_objects::{CallBack, MetaData, ImageSrc};
 use serde::Serialize;
 
 // LaTeXBody {{{
@@ -6,7 +6,7 @@ use serde::Serialize;
 /// This structs contains the possible items that the _latex_ endpoint accepts
 pub struct LaTeXBody {
     /// Image data, or public URL where image is located
-    pub src: Src,
+    pub src: ImageSrc,
     /// String postprocessing formats (see [Formatting](https://docs.mathpix.com/?shell#formatting-2) section)
     pub formats: Vec<LaTeXFormats>,
     /// Configuration options for the _latex_ endpoint
@@ -249,7 +249,7 @@ mod test {
     fn serialize_latexbody() {
         //{{{
         let url = Url::parse("https://www.duckduckgo.com/").unwrap();
-        let src = Src::Url(url);
+        let src = ImageSrc::Url(url);
         let formats = vec![
             LaTeXFormats::AsciiMath,
             LaTeXFormats::LaTeXNormal,

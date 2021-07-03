@@ -93,7 +93,7 @@ mod test {
             include_table_html: None,
             include_tsv: None,
         };
-        let src = text::Src::Image(image);
+        let src = text::ImageSrc::Image(image);
 
         let text_body_opts = TextBodyOptions {
             metadata: None,

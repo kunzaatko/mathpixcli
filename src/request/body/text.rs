@@ -1,4 +1,4 @@
-pub use super::shared_objects::{Base64Image, DataOptions, MetaData, Src};
+pub use super::shared_objects::{AlphabetsAllowed, Base64Image, DataOptions, ImageSrc, MetaData};
 use serde::Serialize;
 
 // TextBody {{{
@@ -6,7 +6,7 @@ use serde::Serialize;
 /// This structs contains the possible items that the _text_ endpoint accepts
 pub struct TextBody {
     /// Image data, or public URL where image is located
-    pub src: Src,
+    pub src: ImageSrc,
     /// Configuration options for the _text_ endpoint
     #[serde(flatten)]
     pub options: TextBodyOptions,
@@ -166,91 +166,11 @@ impl ToString for TextFormats {
 }
 //}}}
 
-// AlphabetsAllowed {{{
-// NOTE: Serialization adds serde_json::Value::Null when None... This may not work with the API. A
-// test is needed. <21-05-21, kunzaatko> //
-#[derive(Debug, PartialEq, Serialize, Clone)]
-pub struct AlphabetsAllowed {
-    /// English
-    pub en: Option<bool>,
-    /// Hindi Devangari
-    pub hi: Option<bool>,
-    /// Chinese
-    pub zh: Option<bool>,
-    /// Kana Hiragana or Katakana
-    pub ja: Option<bool>,
-    /// Hangul Jamo
-    pub ko: Option<bool>,
-    /// Russian
-    pub ru: Option<bool>,
-    /// Thai
-    pub th: Option<bool>,
-}
-
-impl Default for AlphabetsAllowed {
-    fn default() -> Self {
-        AlphabetsAllowed {
-            en: None,
-            hi: None,
-            zh: None,
-            ja: None,
-            ko: None,
-            ru: None,
-            th: None,
-        }
-    }
-}
-
-impl AlphabetsAllowed {
-    pub fn disallow(&mut self, alphabets: Vec<String>) -> Result<(), String> {
-        for alphabet in alphabets {
-            match alphabet.as_str() {
-                "en" => self.en = Some(false),
-                "hi" => self.hi = Some(false),
-                "zh" => self.zh = Some(false),
-                "ja" => self.ja = Some(false),
-                "ko" => self.ko = Some(false),
-                "ru" => self.ru = Some(false),
-                "th" => self.th = Some(false),
-                other => {
-                    return Err(format!(
-                    "UnknownAlphabet: {} is not in known alphabets (en, hi, zh, ja, ko, ru, th)",
-                    other
-                ))
-                }
-            }
-        }
-        Ok(())
-    }
-
-    pub fn allow(&mut self, alphabets: Vec<String>) -> Result<(), String> {
-        for alphabet in alphabets {
-            match alphabet.as_str() {
-                "en" => self.en = Some(true),
-                "hi" => self.hi = Some(true),
-                "zh" => self.zh = Some(true),
-                "ja" => self.ja = Some(true),
-                "ko" => self.ko = Some(true),
-                "ru" => self.ru = Some(true),
-                "th" => self.th = Some(true),
-                other => {
-                    return Err(format!(
-                    "UnknownAlphabet: {} is not in known alphabets (en, hi, zh, ja, ko, ru, th)",
-                    other
-                ))
-                }
-            }
-        }
-        Ok(())
-    }
-}
-// }}}
-
 // TESTS {{{
 #[cfg(test)]
 mod test {
     use super::super::shared_objects::Base64Image;
-    use super::{AlphabetsAllowed, DataOptions, Src, TextBody, TextBodyOptions, TextFormats};
+    use super::{AlphabetsAllowed, DataOptions, ImageSrc, TextBody, TextBodyOptions, TextFormats};
     use serde_json::{json, Value::Null};
     use std::convert::TryInto;
     use std::path::PathBuf;
@@ -390,7 +310,7 @@ mod test {
             include_table_html: None,
             include_tsv: None,
         };
-        let src = Src::Image(image);
+        let src = ImageSrc::Image(image);
 
         let text_body_opts = TextBodyOptions {
             metadata: None,
