@@ -302,6 +302,14 @@ fn main() {
         ); //}}}
            //}}}
 
+    // PDF endpoint {{{
+    let pdf_subcommand = App::new("pdf").about("PDF endpoint for for the Mathpix API");
+    // }}}
+
+    // TODO: PDF endpoint <03-07-21, kunzaatko> //
+    // TODO: Strokes endpoint <03-07-21, kunzaatko> //
+    // TODO: Batch endpoint <03-07-21, kunzaatko> //
+
     let args = App::new("MathpixCLI")
         .version(crate_version!())
         .author(crate_authors!())
@@ -327,5 +335,6 @@ fn main() {
         .subcommand(text_subcommand)
         .subcommand(latex_subcommand)
         .subcommand(strokes_subcommand)
+        .subcommand(pdf_subcommand)
         .get_matches();
 }

@@ -39,6 +39,8 @@ pub struct Request {
     body: Body,
 }
 
+use body::pdf::PDFSrc;
+
 impl Request {
     /// Get the url that is appropriate for the endpoint
     pub fn url(&self) -> reqwest::Url {
@@ -46,7 +48,10 @@ impl Request {
         url.push_str(match &self.body {
             Body::Batch(_) => "batch",
             Body::LaTeX(_) => "latex",
-            Body::PDF(_) => "pdf",
+            Body::PDF(pdf) => match pdf.src {
+                PDFSrc::Path(_) => "pdf-file",
+                PDFSrc::Url(_) => "pdf",
+            },
             Body::Strokes(_) => "strokes",
             Body::Text(_) => "text",
         });

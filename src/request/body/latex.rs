@@ -1,4 +1,4 @@
-pub use super::shared_objects::{CallBack, MetaData, ImageSrc};
+pub use super::shared_objects::{CallBack, ImageSrc, MetaData};
 use serde::Serialize;
 
 // LaTeXBody {{{

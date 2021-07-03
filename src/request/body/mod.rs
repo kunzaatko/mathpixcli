@@ -124,8 +124,8 @@ pub enum Body {
 mod test {
     use super::Body::Text;
     use super::{
-        text::AlphabetsAllowed, text::Base64Image, text::DataOptions, text::ImageSrc, text::TextBody,
-        text::TextBodyOptions, text::TextFormats,
+        text::AlphabetsAllowed, text::Base64Image, text::DataOptions, text::ImageSrc,
+        text::TextBody, text::TextBodyOptions, text::TextFormats,
     };
     use serde_json::{json, Value::Null};
     use std::convert::TryInto;
