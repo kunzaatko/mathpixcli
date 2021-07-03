@@ -267,7 +267,7 @@ fn main() {
                 .long("include_detected_alphabets")
                 .about("Detected alphabets in the response"),
         ); //}}}
-           // }}}
+        // }}}
 
     // Strokes endpoint {{{
     let strokes_subcommand = App::new("strokes")
@@ -300,14 +300,12 @@ fn main() {
                 ])
                 .multiple(true),
         ); //}}}
-           //}}}
+        //}}}
 
     // PDF endpoint {{{
     let pdf_subcommand = App::new("pdf").about("PDF endpoint for for the Mathpix API");
     // }}}
 
-    // TODO: PDF endpoint <03-07-21, kunzaatko> //
-    // TODO: Strokes endpoint <03-07-21, kunzaatko> //
     // TODO: Batch endpoint <03-07-21, kunzaatko> //
 
     let args = App::new("MathpixCLI")

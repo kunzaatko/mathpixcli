@@ -1,6 +1,7 @@
 pub use super::shared_objects::{AlphabetsAllowed, MetaData};
 use reqwest::Url;
-use serde::ser::{Serialize, SerializeStruct, Serializer};
+use serde::ser::{SerializeStruct, Serializer};
+use serde::Serialize;
 use std::convert::TryFrom;
 use std::path::PathBuf;
 
@@ -21,7 +22,7 @@ impl Serialize for PDFBody {
     where
         S: Serializer,
     {
-        let mut state = serializer.serialize_struct("PostPDF", 1)?;
+        let mut state = serializer.serialize_struct("PostPDF", 2)?;
         if let PDFSrc::Url(url) = &self.src {
             state.serialize_field("url", &url.to_string())?;
         }
@@ -29,7 +30,7 @@ impl Serialize for PDFBody {
     }
 } //}}}
 
-#[derive(Debug, Default)]
+#[derive(Debug, Default, Serialize)]
 pub struct PDFBodyOptions {}
 
 /// A checked pdf file path

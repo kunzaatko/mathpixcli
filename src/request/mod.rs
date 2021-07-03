@@ -27,8 +27,8 @@ pub mod body; //}}}
 pub mod header; //}}}
 
 use reqwest;
-use std::convert::TryInto;
-use std::future::Future;
+// use std::convert::TryInto;
+// use std::future::Future;
 
 pub use body::Body;
 pub use header::Header;
@@ -58,18 +58,22 @@ impl Request {
         reqwest::Url::parse(&url).unwrap()
     }
 
-    /// Post the the request to the correct endpoint
-    pub fn post(
-        &self,
-        client: reqwest::Client,
-    ) -> impl Future<Output = Result<reqwest::Response, reqwest::Error>> {
-        let header_map: reqwest::header::HeaderMap = self.header.clone().try_into().unwrap();
-        client
-            .post(self.url())
-            .headers(header_map)
-            .json(&self.body)
-            .send()
-    }
+    ///// Post the the request to the correct endpoint
+    // pub fn post(
+    //     &self,
+    //     client: reqwest::Client,
+    // ) -> impl Future<Output = Result<reqwest::Response, reqwest::Error>> {
+    //     let header_map: reqwest::header::HeaderMap = self.header.clone().try_into().unwrap();
+    //     if let  = self.body {
+    //         client.post(self.url()).headers(header_map).form(&self.)
+    //     } else {
+    //         client
+    //             .post(self.url())
+    //             .headers(header_map)
+    //             .json(&self.body)
+    //             .send()
+    //     }
+    // }
 }
 
 // TESTS {{{
