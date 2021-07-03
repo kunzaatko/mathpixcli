@@ -22,8 +22,12 @@ impl TryFrom<PathBuf> for Base64Image {
             .ok_or_else(|| "Extension not found or no file passed".to_string())?;
         let img_mime = match extension {
             // FIX: error handling <22-05-21, kunzaatko> //
-            _ if JPEG_EXTENSIONS.contains(&extension.to_str().unwrap()) => IMAGE_JPEG,
-            _ if PNG_EXTENSIONS.contains(&extension.to_str().unwrap()) => IMAGE_PNG,
+            _ if JPEG_EXTENSIONS.contains(&extension.to_str().unwrap().to_lowercase().as_str()) => {
+                IMAGE_JPEG
+            }
+            _ if PNG_EXTENSIONS.contains(&extension.to_str().unwrap().to_lowercase().as_str()) => {
+                IMAGE_PNG
+            }
             _ => return Err("Unsupported filetype. jpg and png images are supported.".to_string()),
         };
         Ok(Base64Image {
@@ -77,6 +81,21 @@ mod test {
         };
         assert_eq!(base64image, acctual);
     } //}}}
+
+    #[test]
+    fn base64_from_pathbuf_upercase_extension() {
+        //{{{
+        let base64image: Base64Image =
+            PathBuf::from("./test/assets/test_encode_base64.JPG".to_string())
+                .try_into()
+                .unwrap();
+        let acctual = Base64Image {
+            img_path: "./test/assets/test_encode_base64.JPG".into(),
+            img_mime: IMAGE_JPEG,
+        };
+        assert_eq!(base64image, acctual);
+        //}}}
+    }
 
     #[test]
     fn base64image_to_string() {
