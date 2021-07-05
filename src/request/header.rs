@@ -5,26 +5,26 @@ use std::convert::TryFrom;
 
 #[derive(Serialize, Debug, Clone)]
 /// Struct storing the `"app_id"` and `"app_key"` for authentication when using the API.
-pub struct Header {
+pub struct AuthHeader {
     pub app_id: String,
     pub app_key: String,
 }
 
-impl Header {
+impl AuthHeader {
     const CONTENT_TYPE: Mime = APPLICATION_JSON;
     // TODO: Add function for adding values to HeaderMap without having to construct one <03-05-21, kunzaatko> //
 }
 
-impl TryFrom<Header> for HeaderMap {
+impl TryFrom<AuthHeader> for HeaderMap {
     //{{{
     type Error = reqwest::header::InvalidHeaderValue;
 
-    fn try_from(val: Header) -> Result<Self, Self::Error> {
+    fn try_from(val: AuthHeader) -> Result<Self, Self::Error> {
         let mut map = HeaderMap::with_capacity(3);
 
         map.insert(
             HeaderName::from_static("content-type"),
-            HeaderValue::from_str(Header::CONTENT_TYPE.essence_str()).unwrap(), // essence_str of APPLICATION_JSON is "application/json"
+            HeaderValue::from_str(AuthHeader::CONTENT_TYPE.essence_str()).unwrap(), // essence_str of APPLICATION_JSON is "application/json"
         );
 
         let app_id = HeaderValue::from_str(&val.app_id)?;
@@ -40,14 +40,14 @@ impl TryFrom<Header> for HeaderMap {
 // TESTS {{{
 #[cfg(test)]
 mod tests {
-    use super::Header;
+    use super::AuthHeader;
     use reqwest::header::{HeaderMap, HeaderValue};
     use std::convert::TryFrom;
 
     #[test]
     fn try_from_header() {
         //{{{
-        let header = Header {
+        let header = AuthHeader {
             app_id: "nevypustsupyven_gmail_com_24325g_26c684".to_owned(),
             app_key: "29f1253cb23b8se13fgd".to_owned(),
         };
