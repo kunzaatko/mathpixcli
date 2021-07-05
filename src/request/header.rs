@@ -1,9 +1,8 @@
 use mime::{Mime, APPLICATION_JSON};
 use reqwest::header::{HeaderMap, HeaderName, HeaderValue};
 use serde::Serialize;
-use std::convert::TryFrom;
 
-#[derive(Serialize, Debug, Clone)]
+#[derive(Serialize, Debug, Clone, PartialEq)]
 /// Struct storing the `"app_id"` and `"app_key"` for authentication when using the API.
 pub struct AuthHeader {
     pub app_id: String,
@@ -13,9 +12,15 @@ pub struct AuthHeader {
 impl AuthHeader {
     const CONTENT_TYPE: Mime = APPLICATION_JSON;
     // TODO: Add function for adding values to HeaderMap without having to construct one <03-05-21, kunzaatko> //
+    pub fn new<ID: ToString, KEY: ToString>(id: ID, key: KEY) -> Self {
+        AuthHeader {
+            app_id: id.to_string(),
+            app_key: key.to_string(),
+        }
+    }
 }
 
-impl TryFrom<AuthHeader> for HeaderMap {
+/* impl TryFrom<AuthHeader> for HeaderMap {
     //{{{
     type Error = reqwest::header::InvalidHeaderValue;
 
@@ -35,7 +40,27 @@ impl TryFrom<AuthHeader> for HeaderMap {
 
         Ok(map)
     }
-} //}}}
+} //}}} */
+
+// TODO: This could fail but I do not consider the scenario <05-07-21, kunzaatko> //
+impl From<AuthHeader> for HeaderMap {
+    fn from(val: AuthHeader) -> Self {
+        let mut map = HeaderMap::with_capacity(3);
+
+        map.insert(
+            HeaderName::from_static("content-type"),
+            HeaderValue::from_str(AuthHeader::CONTENT_TYPE.essence_str()).unwrap(), // essence_str of APPLICATION_JSON is "application/json"
+        );
+
+        let app_id = HeaderValue::from_str(&val.app_id).unwrap();
+        map.insert(HeaderName::from_static("app_id"), app_id);
+
+        let app_key = HeaderValue::from_str(&val.app_key).unwrap();
+        map.insert(HeaderName::from_static("app_key"), app_key);
+
+        map
+    }
+}
 
 // TESTS {{{
 #[cfg(test)]
@@ -62,5 +87,20 @@ mod tests {
         {
             assert!(map[header_key] == header_val)
         }
+    } //}}}
+
+    #[test]
+    fn new_auth_header() {
+        //{{{
+        let header = AuthHeader::new(
+            "nevypustsupyven_gmail_com_24325g_26c684",
+            "29f1253cb23b8se13fgd",
+        );
+        let expected = AuthHeader {
+            app_id: "nevypustsupyven_gmail_com_24325g_26c684".to_string(),
+            app_key: "29f1253cb23b8se13fgd".to_string(),
+        };
+
+        assert_eq!(header, expected)
     } //}}}
 } //}}}

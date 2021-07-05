@@ -267,7 +267,7 @@ fn main() {
                 .long("include_detected_alphabets")
                 .about("Detected alphabets in the response"),
         ); //}}}
-        // }}}
+           // }}}
 
     // Strokes endpoint {{{
     let strokes_subcommand = App::new("strokes")
@@ -300,7 +300,7 @@ fn main() {
                 ])
                 .multiple(true),
         ); //}}}
-        //}}}
+           //}}}
 
     // PDF endpoint {{{
     let pdf_subcommand = App::new("pdf").about("PDF endpoint for for the Mathpix API");

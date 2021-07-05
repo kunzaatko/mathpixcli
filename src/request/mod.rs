@@ -39,7 +39,7 @@ where
     // Self::Response: Sized + serde::Deserialize<'a> + TryFrom<reqwest::Response>,
     <Self::Response as TryFrom<reqwest::Response>>::Error: Into<Self::Error>,
     <Self as MathpixEndpoint>::Error: From<std::convert::Infallible>,
-    <Self as MathpixEndpoint>::Response: From<reqwest::Response>
+    <Self as MathpixEndpoint>::Response: From<reqwest::Response>,
 {
     type Src;
     type Options;
@@ -49,31 +49,32 @@ where
     fn new<S: TryInto<Self::Src>>(&self, src: S) -> Result<Self, Self::Error>
     where
         <S as TryInto<Self::Src>>::Error: Into<Self::Error>;
+
     fn src(&self) -> Self::Src;
+
     fn options(&self) -> Self::Options;
+
     // TODO: This should return a future with a ResponseType from this crate <04-07-21, kunzaatko> //
     fn send_request<H: Into<self::AuthHeader>, F>(&self, header: H) -> F
     where
         F: Future<Output = Result<Self::Response, Self::Error>>;
+
     fn to_request<H: Into<self::AuthHeader>>(
         &self,
         header: H,
-    ) -> Result<reqwest::Request, Self::Error>;
+    ) -> Result<reqwest::Request, Self::Error>
+    where
+        // TODO:  <05-07-21, kunzaatko> //
+        <Self as MathpixEndpoint>::Error: From<reqwest::Error>,
+    {
+        let headers: reqwest::header::HeaderMap = header.into().into();
+        Ok(self.to_request_builder().headers(headers).build()?)
+    }
+
     fn to_request_builder(&self) -> reqwest::RequestBuilder;
+
     fn url(&self) -> reqwest::Url;
 }
-
-/* impl<E> MathpixEndpoint for E
-where
-    E: From<(<E as MathpixEndpoint>::Src, <E as MathpixEndpoint>::Options)>,
-{
-    fn new<S: TryInto<Self::Src>>(&self, src: S) -> Result<Self, Self::Error>
-    where
-        <S as TryInto<Self::Src>>::Error: Into<Self::Error>,
-    {
-        (src.try_into()?, self.options()).into()
-    }
-} */
 
 pub use body::Body;
 pub use header::AuthHeader;
