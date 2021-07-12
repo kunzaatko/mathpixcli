@@ -30,17 +30,17 @@ pub struct MetaData {}
 // DataOptions {{{
 #[derive(Debug, Serialize, PartialEq, Clone)]
 pub struct DataOptions {
-    /// Include math SVG in `html` and `data` formats
+    /// > Include math SVG in `html` and `data` formats
     pub include_svg: Option<bool>,
-    /// Include HTML for `html` and `data` outputs (tables only)
+    /// > Include HTML for `html` and `data` outputs (tables only)
     pub include_table_html: Option<bool>,
-    /// Include math mode latex in `data` and `html`
+    /// > Include math mode latex in `data` and `html`
     pub include_latex: Option<bool>,
-    /// Include tab separated values (TSV) in `data` and `html` outputs (tables only)
+    /// > Include tab separated values (TSV) in `data` and `html` outputs (tables only)
     pub include_tsv: Option<bool>,
-    /// Include asciimath in `data` and `html` outputs
+    /// > Include asciimath in `data` and `html` outputs
     pub include_asciimath: Option<bool>,
-    /// Include mathml in `data` and `html` outputs
+    /// > Include mathml in `data` and `html` outputs
     pub include_mathml: Option<bool>,
 }
 
@@ -71,11 +71,11 @@ impl Default for DataOptions {
 // CallBack {{{
 #[derive(Debug, Serialize, PartialEq, Clone)]
 pub struct CallBack {
-    /// URL to which to make POST callback
+    /// > URL to which to make POST callback
     pub post: Option<String>,
-    /// Key value pairs of headers to make POST
+    /// > Key value pairs of headers to make POST
     pub headers: Option<String>,
-    /// Sets values of `reply` field of callback response object (see [callback response object](https://docs.mathpix.com/?shell#callback-response-object))
+    /// > Sets values of `reply` field of callback response object (see [callback response object](https://docs.mathpix.com/?shell#callback-response-object))
     pub reply: Option<String>,
 }
 //}}}

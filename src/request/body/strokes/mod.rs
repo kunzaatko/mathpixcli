@@ -8,7 +8,7 @@ use serde_json::Value as JsonValue;
 pub struct StrokesBody {
     // NOTE: on construction, `is_array(&self)` should be used to check whether it is an array.
     // Also eltype should be Number (`is_number(&self)`)
-    /// Strokes in JSON with appropriate format.
+    /// > Strokes in JSON with appropriate format.
     pub strokes: JsonValue,
     /// Configuration options for the _strokes_ endpoint
     #[serde(flatten)]
@@ -19,11 +19,11 @@ pub struct StrokesBody {
 // StrokesBodyOptions {{{
 #[derive(Serialize, Debug)]
 pub struct StrokesBodyOptions {
-    /// Key value object
+    /// > Key value object
     pub metadata: Option<MetaData>,
-    /// List of formats, one of `text`, `data`, `html`
+    /// > List of formats, one of `text`, `data`, `html`
     pub formats: Option<Vec<StrokesFormats>>,
-    /// see [DataOptions](https://docs.mathpix.com/?shell#dataoptions-object) section above, specifies outputs for `data` and `html` return fields
+    /// > see [DataOptions](https://docs.mathpix.com/?shell#dataoptions-object) section above, specifies outputs for `data` and `html` return fields
     pub data_options: Option<DataOptions>,
 }
 
@@ -43,11 +43,11 @@ impl Default for StrokesBodyOptions {
 #[derive(Debug, Serialize)]
 #[serde(rename_all = "snake_case")]
 pub enum StrokesFormats {
-    /// Mathpix markdown formatted text
+    /// > Mathpix markdown formatted text
     Text,
-    /// HTML rendered from `text` via mathpix-markdown-it
+    /// > HTML rendered from `text` via mathpix-markdown-it
     Html,
-    /// Data extracte from `html` as specified in the `data_options` request parameter
+    /// > Data extracte from `html` as specified in the `data_options` request parameter
     Data,
 }
 // }}}

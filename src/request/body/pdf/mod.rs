@@ -11,9 +11,9 @@ const PDF_EXTENSIONS: &[&str] = &["pdf"];
 #[derive(Debug)]
 /// This structs contains the possible items that the _text_ endpoint accepts
 pub struct PDFBody {
-    /// Source of PDF
+    /// > Source of PDF
     pub src: PDFSrc,
-    /// Configuration options for the _PDF_ endpoint
+    /// > Configuration options for the _PDF_ endpoint
     pub options: PDFBodyOptions,
 }
 

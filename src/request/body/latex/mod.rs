@@ -5,9 +5,9 @@ use serde::Serialize;
 #[derive(Serialize, Debug)]
 /// This structs contains the possible items that the _latex_ endpoint accepts
 pub struct LaTeXBody {
-    /// Image data, or public URL where image is located
+    /// > Image data, or public URL where image is located
     pub src: ImageSrc,
-    /// String postprocessing formats (see [Formatting](https://docs.mathpix.com/?shell#formatting-2) section)
+    /// > String postprocessing formats (see [Formatting](https://docs.mathpix.com/?shell#formatting-2) section)
     pub formats: Vec<LaTeXFormats>,
     /// Configuration options for the _latex_ endpoint
     #[serde(flatten)]
@@ -17,31 +17,31 @@ pub struct LaTeXBody {
 // LaTeXBodyOptions {{{
 #[derive(Debug, Serialize, PartialEq)]
 pub struct LaTeXBodyOptions {
-    /// Process only math `["math"]` or both math and text `["math", "text"]`
+    /// > Process only math `["math"]` or both math and text `["math", "text"]`
     pub ocr: Option<Vec<Ocr>>,
-    /// Options for specific formats (see [Formatting](https://docs.mathpix.com/?shell#format-options) section)
+    /// > Options for specific formats (see [Formatting](https://docs.mathpix.com/?shell#format-options) section)
     pub format_options: Option<FormatOptions>,
-    /// Force algorithm to consider whole image
+    /// > Force algorithm to consider whole image
     pub skip_recrop: Option<bool>,
     // TODO: bounded 0-1. <01-05-21, kunzaatko> //
-    /// Set threshold for triggering confidence errors
+    /// > Set threshold for triggering confidence errors
     pub confidence_threshold: Option<f32>,
     // TODO: this should be bounded. It is from 1-5. <01-05-21, kunzaatko> //
-    /// Number of results to consider during recognition (an integer 1-5)
+    /// > Number of results to consider during recognition (an integer 1-5)
     pub beam_size: Option<u8>,
     // TODO: this should be bounded. It is from 1-beam_size. <01-05-21, kunzaatko> //
-    /// Number of highest-confidence results to return (an integer 1-`beam_size`)
+    /// > Number of highest-confidence results to return (an integer 1-`beam_size`)
     pub n_best: Option<u8>,
-    /// Specify the image area with the pixel coordinates `top_left_x`, `top_left_y`, `width`, and `height`
+    /// > Specify the image area with the pixel coordinates `top_left_x`, `top_left_y`, `width`, and `height`
     pub region: Option<Region>,
-    /// Callback request object
+    /// > Callback request object
     pub callback: Option<CallBack>,
-    /// Key value object
+    /// > Key value object
     pub metadata: Option<MetaData>,
-    /// Return detected alphabets
+    /// > Return detected alphabets
     pub include_detected_alphabets: Option<bool>,
     // TODO: bounded 0-1. <01-05-21, kunzaatko> //
-    /// Specifies threshold for auto rotating image to correct orientation; by default it is set to `0.99`, can be disabled with a value of `1` (see [Auto rotation](https://docs.mathpix.com/?shell#auto-rotation) section for details)
+    /// > Specifies threshold for auto rotating image to correct orientation; by default it is set to `0.99`, can be disabled with a value of `1` (see [Auto rotation](https://docs.mathpix.com/?shell#auto-rotation) section for details)
     pub auto_rotate_confidence_threshold: Option<f32>,
 }
 
@@ -82,29 +82,29 @@ impl LaTeXBodyOptions {
 #[derive(Debug, Serialize, Clone)]
 #[serde(rename_all = "snake_case")]
 pub enum LaTeXFormats {
-    /// Text mode output, with math inside delimiters, eg. test \(x^2\), inline math by default
+    /// > Text mode output, with math inside delimiters, eg. test \(x^2\), inline math by default
     Text,
-    /// Same as text, except uses block mode math instead of inline mode when in doubt
+    /// > Same as text, except uses block mode math instead of inline mode when in doubt
     TextDisplay,
-    /// Direct LaTeX representation of the input
+    /// > Direct LaTeX representation of the input
     #[serde(rename = "latex_normal")]
     LaTeXNormal,
-    /// Modified output to improve the visual appearance such as adding '\left' and '\right' around parenthesized expressions that contain tall expressions like subscript or superscript
+    /// > Modified output to improve the visual appearance such as adding '\left' and '\right' around parenthesized expressions that contain tall expressions like subscript or superscript
     #[serde(rename = "latex_styled")]
     LaTeXStyled,
-    /// Modified output for symbolic processing such as shortening operator names, replacing long division with a fraction, and converting a column of operands into a single formula
+    /// > Modified output for symbolic processing such as shortening operator names, replacing long division with a fraction, and converting a column of operands into a single formula
     #[serde(rename = "latex_simplified")]
     LaTeXSimplified,
-    /// Output split into a list of simplified strings to help process multiple equations
+    /// > Output split into a list of simplified strings to help process multiple equations
     #[serde(rename = "latex_list")]
     LaTeXList,
-    /// The MathML for the recognized math
+    /// > The MathML for the recognized math
     #[serde(rename = "mathml")]
     MathML,
-    /// The AsciiMath for the recognized math
+    /// > The AsciiMath for the recognized math
     #[serde(rename = "asciimath")]
     AsciiMath,
-    /// A string compatible with the Wolfram Alpha engine
+    /// > A string compatible with the Wolfram Alpha engine
     Wolfram,
 }
 // }}}
@@ -114,9 +114,9 @@ pub enum LaTeXFormats {
 #[derive(Debug, Serialize, PartialEq, Clone)]
 #[serde(rename_all = "snake_case")]
 pub enum Ocr {
-    /// Process math from the input
+    /// > Process math from the input
     Math,
-    /// Process text from the image
+    /// > Process text from the image
     Text,
 }
 // }}}
@@ -124,13 +124,13 @@ pub enum Ocr {
 // FormatOptions {{{
 #[derive(Debug, Serialize, PartialEq, Clone)]
 pub struct FormatOptions {
-    /// Array of transformation names
+    /// > Array of transformation names
     pub transforms: Option<Vec<Transforms>>,
     // TODO: Add the constraint of ony two stings supplied <14-05-21, kunzaatko> //
-    /// [begin, end] delimiters for math mode (for example `["\(","\)"]`)
+    /// > [begin, end] delimiters for math mode (for example `["\(","\)"]`)
     pub math_delims: Option<Vec<String>>,
     // TODO: Add the constraint of ony two stings supplied <14-05-21, kunzaatko> //
-    /// [begin, end] delimiters for displaymath mode (for example `["\(","\)"]`)
+    /// > [begin, end] delimiters for displaymath mode (for example `["\(","\)"]`)
     pub displaymath_delims: Option<Vec<String>>,
 }
 //}}}
@@ -139,17 +139,17 @@ pub struct FormatOptions {
 #[derive(Debug, Serialize, PartialEq, Clone)]
 #[serde(rename_all = "snake_case")]
 pub enum Transforms {
-    /// Omit spaces around LaTeX groups and other places where spaces are superfluous
+    /// > Omit spaces around LaTeX groups and other places where spaces are superfluous
     RmSpaces,
-    /// Uses spaces instead of newlines between text lines in paragraphs
+    /// > Uses spaces instead of newlines between text lines in paragraphs
     RmNewlines,
-    /// Omit mathbb, mathbf, mathcal, and mathrm commands
+    /// > Omit mathbb, mathbf, mathcal, and mathrm commands
     RmFonts,
-    /// Replace styled commands with unstyled versions, e.g., bigoplus becomes oplus
+    /// > Replace styled commands with unstyled versions, e.g., bigoplus becomes oplus
     RmStyleSyms,
-    /// Omit text to the left or right of math
+    /// > Omit text to the left or right of math
     RmText,
-    /// Convert longdiv to frac
+    /// > Convert longdiv to frac
     LongFrac,
 }
 // }}}

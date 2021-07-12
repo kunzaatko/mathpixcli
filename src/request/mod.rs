@@ -9,31 +9,32 @@ pub mod body; //}}}
 
 // pub mod header; {{{
 /// Module for creating the header of requests.
-/// ```text
-///  MathpixOCR uses API keys to allow access to the API. You can find your API keys on
-///  your account dashboard at https://accounts.mathpix.com/ocr-api.
 ///
-///  MathpixOCR expects for the API key to be included in all API requests to the server
-///  via HTTP Basic Auth. Expected set of HTTP headers is shown on the right.
-/// ```
-///  The header structure that the API requires looks like this:
-///  ```json
-///  {
-///     "content-type": "application/json",
-///     "app_id": "YOUR_APP_ID",
-///     "app_key": "YOUR_APP_KEY"
-///  }
-///  ```
+///  > MathpixOCR uses API keys to allow access to the API. You can find your API keys on
+///  > your account dashboard at https://accounts.mathpix.com/ocr-api.
+///
+///  > MathpixOCR expects for the API key to be included in all API requests to the server
+///  > via HTTP Basic Auth. Expected set of HTTP headers is shown on the right.
+/// >
+/// > The header structure that the API requires looks like this:
+/// > ```json
+/// > {
+/// >    "content-type": "application/json",
+/// >    "app_id": "YOUR_APP_ID",
+/// >    "app_key": "YOUR_APP_KEY"
+/// > }
+/// > ```
 pub mod header; //}}}
 
 use reqwest;
 use std::convert::{TryFrom, TryInto};
 use std::future::Future;
 
+/// The main library user interface for any of the Mathpix endpoints
 pub trait MathpixEndpoint
 where
     Self: Sized,
-    Self::Options: Default,
+    Self::Options: Default, // there should be a corresponding default that is the same as the API server default for options
     Self::Error: std::error::Error,
     Self::Options: Sized + serde::Serialize,
     // Self::Response: Sized + serde::Deserialize<'a> + TryFrom<reqwest::Response>,
@@ -41,24 +42,52 @@ where
     <Self as MathpixEndpoint>::Error: From<std::convert::Infallible>,
     <Self as MathpixEndpoint>::Response: From<reqwest::Response>,
 {
+    /// What can be sent through to the endpoint to OCR.
     type Src;
+    /// Possible configuration options for the endpoint OCR request.
     type Options;
+    /// Type that describes the anticipated response fields for the particular endpoint OCR
+    /// result.
     type Response;
+    /// Error type for the particular endpoint. It describes for each endpoint the possible OCR
+    /// errors that can be recieved from the server as well as errors that can occur when manipulating or creating the
+    /// request.
     type Error;
 
-    fn new<S: TryInto<Self::Src>>(&self, src: S) -> Result<Self, Self::Error>
+    /// Create a new reqwest for the given endpoint using an nonobligatory `options` parameter. If
+    /// - `options` is `Some(Self::Options)` then they are used in the constructor
+    /// - `options` is `None` then the default options are used
+    fn new<S: TryInto<Self::Src>>(
+        options: Option<Self::Options>,
+        src: S,
+    ) -> Result<Self, Self::Error>
     where
         <S as TryInto<Self::Src>>::Error: Into<Self::Error>;
 
+    /// Return the source that is meant for OCR
     fn src(&self) -> Self::Src;
 
+    /// Return the options that are to be sent for the OCR
     fn options(&self) -> Self::Options;
 
-    // TODO: This should return a future with a ResponseType from this crate <04-07-21, kunzaatko> //
+    /// Send an API request to the Mathpix server with the given header.
+
+    /// > __NOTE:__ The header is needed for every request due to authentication of the API
+    /// > certificate[^certificate] for the given user. It is done by the mathpix server.
+    /// >
+    /// > [^certificate]: There is a free license for the API certificate available with limited request
+    /// > numbers. For further information see the [mathpix accounts website](https://accounts.mathpix.com/ocr-api).
+
     fn send_request<H: Into<self::AuthHeader>, F>(&self, header: H) -> F
     where
         F: Future<Output = Result<Self::Response, Self::Error>>;
 
+    /// Create a `reqwest::Request` from `self` with the `header`
+
+    /// > __NOTE:__ It should only be necessary to use this method when you want to do something in the weeds
+    /// without it being possible to use `Self::send_request`. One meaningful use could be if you
+    /// wanted to send your requests through something like a VPN and add some more headers to the
+    /// request. Then you would need to have the request itself instead of the future output.
     fn to_request<H: Into<self::AuthHeader>>(
         &self,
         header: H,
@@ -71,8 +100,14 @@ where
         Ok(self.to_request_builder().headers(headers).build()?)
     }
 
+    /// Create a `reqwest::RequestBuilder` from `self`
+
+    /// This could be usefull if you do not want to add the header right away.
     fn to_request_builder(&self) -> reqwest::RequestBuilder;
 
+    /// Return the URL that is associated with the request
+    ///
+    /// > __NOTE:__ It does not have to be the same for the same endpoint. (See PDF)
     fn url(&self) -> reqwest::Url;
 }
 

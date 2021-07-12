@@ -6,40 +6,40 @@ use serde::Serialize;
 // TextBodyOptions {{{
 #[derive(Serialize, Debug, PartialEq)]
 pub struct TextBodyOptions {
-    /// Key value object
+    /// > Key value object
     pub metadata: Option<MetaData>,
-    /// List of formats, one of `text`, `data`, `html`, `latex_styled`, see [Format Descriptions](https://docs.mathpix.com/?shell#format-descriptions)
+    /// > List of formats, one of `text`, `data`, `html`, `latex_styled`, see [Format Descriptions](https://docs.mathpix.com/?shell#format-descriptions)
     pub formats: Option<Vec<TextFormats>>,
-    /// See [DataOptions](https://docs.mathpix.com/?shell#dataoptions-object) section, specifies outputs for `data` and `html` return fields
+    /// > See [DataOptions](https://docs.mathpix.com/?shell#dataoptions-object) section, specifies outputs for `data` and `html` return fields
     pub data_options: Option<DataOptions>,
-    /// Return detected alphabets
+    /// > Return detected alphabets
     pub include_detected_alphabets: Option<bool>,
-    /// See [AlphabetsAllowed](https://docs.mathpix.com/?shell#alphabetsallowed-object) section, use this to specify which alphabets you don't want in the output
+    /// > See [AlphabetsAllowed](https://docs.mathpix.com/?shell#alphabetsallowed-object) section, use this to specify which alphabets you don't want in the output
     pub alphabets_allowed: Option<AlphabetsAllowed>,
     // TODO: Add the num bounded trait (is between 0 and 1) <30-04-21, kunzaatko> //
-    /// Specifies threshold for triggering confidence errors
+    /// > Specifies threshold for triggering confidence errors
     pub confidence_threshold: Option<f32>,
     // TODO: Add the num bounded trait (is between 0 and 1) <30-04-21, kunzaatko> //
-    /// Specifies threshold for triggering confidence errors, default `0.75` (symbol level threshold)
+    /// > Specifies threshold for triggering confidence errors, default `0.75` (symbol level threshold)
     pub confidence_rate_threshold: Option<f32>,
-    /// Specifies whether to return information segmented line by line, see [LineData](https://docs.mathpix.com/?shell#linedata-object) object section for details
+    /// > Specifies whether to return information segmented line by line, see [LineData](https://docs.mathpix.com/?shell#linedata-object) object section for details
     pub include_line_data: Option<bool>,
-    /// Specifies whether to return information segmented word by word, see [WordData](https://docs.mathpix.com/?shell#worddata-object) object section for details
+    /// > Specifies whether to return information segmented word by word, see [WordData](https://docs.mathpix.com/?shell#worddata-object) object section for details
     pub include_word_data: Option<bool>,
-    /// Enable experimental chemistry diagram OCR, via RDKIT normalized SMILES with `isomericSmiles=False`, included in `text` output format, via MMD SMILES syntax `<smiles>...</smiles>`
+    /// > Enable experimental chemistry diagram OCR, via RDKIT normalized SMILES with `isomericSmiles=False`, included in `text` output format, via MMD SMILES syntax `<smiles>...</smiles>`
     pub include_smiles: Option<bool>,
-    /// Include InChI data as XML attributes inside `<smiles>` elements, for examples `<smiles inchi="..." inchikey="...">...</smiles>`; only applies when `include_smiles` is true
+    /// > Include InChI data as XML attributes inside `<smiles>` elements, for examples `<smiles inchi="..." inchikey="...">...</smiles>`; only applies when `include_smiles` is true
     pub include_inchi: Option<bool>,
-    /// Enable data extraction for geometry diagrams (currently only supports triangle diagrams); see [GeometryData](https://docs.mathpix.com/?shell#geometry-objects)
+    /// > Enable data extraction for geometry diagrams (currently only supports triangle diagrams); see [GeometryData](https://docs.mathpix.com/?shell#geometry-objects)
     pub include_geometry_data: Option<bool>,
     // TODO: Add the num bounded trait (is between 0 and 1) <30-04-21, kunzaatko> //
-    /// Specifies threshold for auto rotating image to correct orientation; by default it is set to `0.99`, can be disabled with a value of `1` (see [Auto rotation](https://docs.mathpix.com/?shell#auto-rotation) section for details)
+    /// > Specifies threshold for auto rotating image to correct orientation; by default it is set to `0.99`, can be disabled with a value of `1` (see [Auto rotation](https://docs.mathpix.com/?shell#auto-rotation) section for details)
     pub auto_rotate_confidence_threshold: Option<f32>,
-    /// Determines whether extra white space is removed from equations in `latex_styled` and `text` formats. Default is `true`.
+    /// > Determines whether extra white space is removed from equations in `latex_styled` and `text` formats. Default is `true`.
     pub rm_spaces: Option<bool>,
-    /// Determines whether font commands such as `\mathbf` and `\mathrm` are removed from equations in `latex_styled` and `text` formats. Default is `false`.
+    /// > Determines whether font commands such as `\mathbf` and `\mathrm` are removed from equations in `latex_styled` and `text` formats. Default is `false`.
     pub rm_fonts: Option<bool>,
-    /// Specifies whether numbers are always math, e.g., `Answer: \( 17 \)` instead of `Answer: 17`. Default is `false`.
+    /// > Specifies whether numbers are always math, e.g., `Answer: \( 17 \)` instead of `Answer: 17`. Default is `false`.
     pub numbers_default_to_math: Option<bool>,
 }
 
@@ -133,14 +133,14 @@ impl TextBodyOptions {
 #[derive(Debug, Serialize, PartialEq, Clone)]
 #[serde(rename_all = "snake_case")]
 pub enum TextFormats {
-    /// Mathpix markdown formatted text
+    /// > Mathpix markdown formatted text
     Text,
-    /// HTML rendered from `text` via mathpix-markdown-it
+    /// > HTML rendered from `text` via mathpix-markdown-it
     Html,
-    /// Data extracte from `html` as specified in the `data_options` request parameter
+    /// > Data extracte from `html` as specified in the `data_options` request parameter
     Data,
-    /// Styled LaTeX, returned only in cases that the whole image can be reduces to a single
-    /// equation
+    /// > Styled LaTeX, returned only in cases that the whole image can be reduces to a single
+    /// > equation
     #[serde(rename = "latex_styled")]
     LaTeXStyled,
 }

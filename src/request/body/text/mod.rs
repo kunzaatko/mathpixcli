@@ -1,5 +1,4 @@
 mod options;
-use super::super::MathpixEndpoint;
 pub use super::shared_objects::{AlphabetsAllowed, Base64Image, DataOptions, ImageSrc, MetaData};
 pub use options::{TextBodyOptions, TextFormats};
 use serde::Serialize;
@@ -8,7 +7,7 @@ use serde::Serialize;
 #[derive(Serialize, Debug)]
 /// This structs contains the possible items that the _text_ endpoint accepts
 pub struct TextBody {
-    /// Image data, or public URL where image is located
+    /// > Image data, or public URL where image is located
     pub src: ImageSrc,
     /// Configuration options for the _text_ endpoint
     #[serde(flatten)]
