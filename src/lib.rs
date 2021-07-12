@@ -7,7 +7,7 @@
 //! > notation, as used in chemistry, math, physics, computer science, economics, and other
 //! > STEM subjects.
 //!
-//! > If you have any questions or problems, please send us an email at support@mathpix.com.
+//! > If you have any questions or problems, please send us an email at [support@mathpix.com](mailto:support@mathpix.com).
 // TODO: Add examples for making requests to different endpoints. <23-05-21, kunzaatko> //
 
 #![allow(clippy::upper_case_acronyms)]

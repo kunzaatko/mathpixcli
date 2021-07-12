@@ -11,7 +11,7 @@ pub mod body; //}}}
 /// Module for creating the header of requests.
 ///
 ///  > MathpixOCR uses API keys to allow access to the API. You can find your API keys on
-///  > your account dashboard at https://accounts.mathpix.com/ocr-api.
+///  > your account dashboard at <https://accounts.mathpix.com/ocr-api>.
 ///
 ///  > MathpixOCR expects for the API key to be included in all API requests to the server
 ///  > via HTTP Basic Auth. Expected set of HTTP headers is shown on the right.
