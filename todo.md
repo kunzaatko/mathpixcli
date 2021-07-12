@@ -11,3 +11,4 @@
 - logging file for the outputs
 - flag for copying result to clipboard
 - defining substitutions for custom commands
+- notifications for results
