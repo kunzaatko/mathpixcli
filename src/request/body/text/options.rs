@@ -139,8 +139,10 @@ pub enum TextFormats {
     Html,
     /// > Data extracte from `html` as specified in the `data_options` request parameter
     Data,
-    /// > Styled LaTeX, returned only in cases that the whole image can be reduces to a single
-    /// > equation
+    /**
+    > Styled LaTeX, returned only in cases that the whole image can be reduces to a single
+    > equation
+    */
     #[serde(rename = "latex_styled")]
     LaTeXStyled,
 }

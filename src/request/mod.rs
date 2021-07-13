@@ -2,28 +2,32 @@
 pub const MATHPIX_APIURL: &str = "https://api.mathpix.com/v3/";
 
 // pub mod body; {{{
-/// The body for the endpoints that the API provides all look different. This module implements a
-/// structure for every endpoint that adheres to what the enpoint expects to be the body of the
-/// request.
+/**
+The body for the endpoints that the API provides all look different. This module implements a
+structure for every endpoint that adheres to what the enpoint expects to be the body of the
+request.
+*/
 pub mod body; //}}}
 
 // pub mod header; {{{
-/// Module for creating the header of requests.
-///
-///  > MathpixOCR uses API keys to allow access to the API. You can find your API keys on
-///  > your account dashboard at <https://accounts.mathpix.com/ocr-api>.
-///
-///  > MathpixOCR expects for the API key to be included in all API requests to the server
-///  > via HTTP Basic Auth. Expected set of HTTP headers is shown on the right.
-/// >
-/// > The header structure that the API requires looks like this:
-/// > ```json
-/// > {
-/// >    "content-type": "application/json",
-/// >    "app_id": "YOUR_APP_ID",
-/// >    "app_key": "YOUR_APP_KEY"
-/// > }
-/// > ```
+/**
+Module for creating the header of requests.
+
+> MathpixOCR uses API keys to allow access to the API. You can find your API keys on
+> your account dashboard at <https://accounts.mathpix.com/ocr-api>.
+
+> MathpixOCR expects for the API key to be included in all API requests to the server
+> via HTTP Basic Auth. Expected set of HTTP headers is shown on the right.
+>
+> The header structure that the API requires looks like this:
+> ```json
+> {
+>    "content-type": "application/json",
+>    "app_id": "YOUR_APP_ID",
+>    "app_key": "YOUR_APP_KEY"
+> }
+> ```
+*/
 pub mod header; //}}}
 
 use reqwest;
@@ -46,17 +50,23 @@ where
     type Src;
     /// Possible configuration options for the endpoint OCR request.
     type Options;
-    /// Type that describes the anticipated response fields for the particular endpoint OCR
-    /// result.
+    /**
+    Type that describes the anticipated response fields for the particular endpoint OCR
+    result.
+    */
     type Response;
-    /// Error type for the particular endpoint. It describes for each endpoint the possible OCR
-    /// errors that can be recieved from the server as well as errors that can occur when manipulating or creating the
-    /// request.
+    /**
+    Error type for the particular endpoint. It describes for each endpoint the possible OCR
+    errors that can be recieved from the server as well as errors that can occur when manipulating or creating the
+    request.
+    */
     type Error;
 
-    /// Create a new reqwest for the given endpoint using an nonobligatory `options` parameter. If
-    /// - `options` is `Some(Self::Options)` then they are used in the constructor
-    /// - `options` is `None` then the default options are used
+    /**
+    Create a new reqwest for the given endpoint using an nonobligatory `options` parameter. If
+    - `options` is `Some(Self::Options)` then they are used in the constructor
+    - `options` is `None` then the default options are used
+    */
     fn new<S: TryInto<Self::Src>>(
         options: Option<Self::Options>,
         src: S,
@@ -70,24 +80,27 @@ where
     /// Return the options that are to be sent for the OCR
     fn options(&self) -> Self::Options;
 
-    /// Send an API request to the Mathpix server with the given header.
+    /**
+    Send an API request to the Mathpix server with the given header.
 
-    /// > __NOTE:__ The header is needed for every request due to authentication of the API
-    /// > certificate[^certificate] for the given user. It is done by the mathpix server.
-    /// >
-    /// > [^certificate]: There is a free license for the API certificate available with limited request
-    /// > numbers. For further information see the [mathpix accounts website](https://accounts.mathpix.com/ocr-api).
-
+    > __NOTE:__ The header is needed for every request due to authentication of the API
+    > certificate[^certificate] for the given user. It is done by the mathpix server.
+    >
+    > [^certificate]: There is a free license for the API certificate available with limited request
+    > numbers. For further information see the [mathpix accounts website](https://accounts.mathpix.com/ocr-api).
+    */
     fn send_request<H: Into<self::AuthHeader>, F>(&self, header: H) -> F
     where
         F: Future<Output = Result<Self::Response, Self::Error>>;
 
-    /// Create a `reqwest::Request` from `self` with the `header`
+    /**
+    Create a `reqwest::Request` from `self` with the `header`
 
-    /// > __NOTE:__ It should only be necessary to use this method when you want to do something in the weeds
-    /// without it being possible to use `Self::send_request`. One meaningful use could be if you
-    /// wanted to send your requests through something like a VPN and add some more headers to the
-    /// request. Then you would need to have the request itself instead of the future output.
+    > __NOTE:__ It should only be necessary to use this method when you want to do something in the weeds
+    without it being possible to use `Self::send_request`. One meaningful use could be if you
+    wanted to send your requests through something like a VPN and add some more headers to the
+    request. Then you would need to have the request itself instead of the future output.
+    */
     fn to_request<H: Into<self::AuthHeader>>(
         &self,
         header: H,
@@ -100,14 +113,18 @@ where
         Ok(self.to_request_builder().headers(headers).build()?)
     }
 
-    /// Create a `reqwest::RequestBuilder` from `self`
+    /**
+    Create a `reqwest::RequestBuilder` from `self`
 
-    /// This could be usefull if you do not want to add the header right away.
+    This could be usefull if you do not want to add the header right away.
+    */
     fn to_request_builder(&self) -> reqwest::RequestBuilder;
 
-    /// Return the URL that is associated with the request
-    ///
-    /// > __NOTE:__ It does not have to be the same for the same endpoint. (See PDF)
+    /**
+    Return the URL that is associated with the request
+
+    > __NOTE:__ It does not have to be the same for the same endpoint. (See PDF)
+    */
     fn url(&self) -> reqwest::Url;
 }
 
