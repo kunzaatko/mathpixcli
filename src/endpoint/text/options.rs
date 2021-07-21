@@ -1,11 +1,11 @@
-pub use super::super::shared_objects::{
+pub use super::super::shared_objects::request::{
     AlphabetsAllowed, Base64Image, DataOptions, ImageSrc, MetaData,
 };
 use serde::Serialize;
 
 // TextBodyOptions {{{
 #[derive(Serialize, Debug, PartialEq)]
-pub struct TextBodyOptions {
+pub struct TextOptions {
     /// > Key value object
     pub metadata: Option<MetaData>,
     /// > List of formats, one of `text`, `data`, `html`, `latex_styled`, see [Format Descriptions](https://docs.mathpix.com/?shell#format-descriptions)
@@ -43,9 +43,9 @@ pub struct TextBodyOptions {
     pub numbers_default_to_math: Option<bool>,
 }
 
-impl Default for TextBodyOptions {
+impl Default for TextOptions {
     fn default() -> Self {
-        TextBodyOptions {
+        TextOptions {
             metadata: None,
             formats: None,
             data_options: None,
@@ -66,25 +66,7 @@ impl Default for TextBodyOptions {
     }
 }
 
-macro_rules! data_option_add {
-    ($opt_name: ident) => {
-        pub fn $opt_name(&mut self, val: bool) -> &mut Self {
-            if let Some(data_options) = &mut (self.data_options) {
-                data_options.$opt_name = Some(val);
-            } else {
-                let mut data_options = DataOptions::default();
-                data_options.$opt_name(val);
-                self.data_options = Some(data_options);
-            }
-            self
-        }
-    };
-}
-
-impl TextBodyOptions {
-    field_builder![metadata, MetaData];
-    field_builder![formats, Vec<TextFormats>];
-
+impl TextOptions {
     pub fn add_formats(&mut self, mut formats: Vec<TextFormats>) -> &mut Self {
         if let Some(self_formats) = &mut (self.formats) {
             self_formats.append(&mut formats);
@@ -102,29 +84,6 @@ impl TextBodyOptions {
         }
         self
     }
-
-    field_builder![data_options, DataOptions];
-
-    data_option_add![include_asciimath];
-    data_option_add![include_latex];
-    data_option_add![include_mathml];
-    data_option_add![include_svg];
-    data_option_add![include_table_html];
-    data_option_add![include_tsv];
-
-    field_builder![include_detected_alphabets, bool];
-    field_builder![alphabets_allowed, AlphabetsAllowed];
-    field_builder![confidence_threshold, f32];
-    field_builder![confidence_rate_threshold, f32];
-    field_builder![include_line_data, bool];
-    field_builder![include_word_data, bool];
-    field_builder![include_smiles, bool];
-    field_builder![include_inchi, bool];
-    field_builder![include_geometry_data, bool];
-    field_builder![auto_rotate_confidence_threshold, f32];
-    field_builder![rm_spaces, bool];
-    field_builder![rm_fonts, bool];
-    field_builder![numbers_default_to_math, bool];
 }
 // }}}
 
@@ -162,10 +121,8 @@ impl ToString for TextFormats {
 // TESTS {{{
 #[cfg(test)]
 mod test {
-    use super::super::super::shared_objects::Base64Image;
-    use super::super::{
-        AlphabetsAllowed, DataOptions, ImageSrc, TextBody, TextBodyOptions, TextFormats,
-    };
+    use super::super::super::shared_objects::request::Base64Image;
+    use super::super::{AlphabetsAllowed, DataOptions, ImageSrc, Text, TextFormats, TextOptions};
     use serde_json::{json, Value::Null};
     use std::convert::TryInto;
     use std::path::PathBuf;
@@ -288,7 +245,7 @@ mod test {
     } //}}}
 
     #[test]
-    fn serialize_textbody() {
+    fn serialize_text() {
         //{{{
         let image: Base64Image = PathBuf::from("./test/assets/test_encode_base64.jpg".to_string())
             .try_into()
@@ -307,7 +264,7 @@ mod test {
         };
         let src = ImageSrc::Image(image);
 
-        let text_body_opts = TextBodyOptions {
+        let text_opts = TextOptions {
             metadata: None,
             formats: Some(vec![TextFormats::Text, TextFormats::Data]),
             alphabets_allowed: Some(alphabets_allowed),
@@ -326,11 +283,11 @@ mod test {
             numbers_default_to_math: None,
         };
 
-        let text_body = TextBody {
+        let text = Text {
             src,
-            options: text_body_opts,
+            options: text_opts,
         };
-        let serialized = serde_json::to_value(&text_body).unwrap();
+        let serialized = serde_json::to_value(&text).unwrap();
         let expected = json!({
             "src" : "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAMCAgICAgMCAgIDAwMDBAYEBAQEBAgGBgUGCQgKCgkICQkKDA8MCgsOCwkJDRENDg8QEBEQCgwSExIQEw8QEBD/wAALCAACAAIBAREA/8QAFAABAAAAAAAAAAAAAAAAAAAACP/EABwQAAEFAQEBAAAAAAAAAAAAAAIBAwQFBgcIAP/aAAgBAQAAPwBfeevPXAt7wLmm63XD+f6PSaPH01tcXFtmYUydZTpEJp1+TIfdbJx55xwzM3DJSIiUlVVVV+//2Q==",
             "metadata": Null,
@@ -369,101 +326,17 @@ mod test {
     } //}}}
 
     #[test]
-    fn builder_text_body_options() {
+    fn builder_formats_text_options() {
         //{{{
-        let mut alphabets_allowed = AlphabetsAllowed::default();
-        alphabets_allowed
-            .disallow(vec!["en".to_string(), "ru".to_string()])
-            .unwrap();
-        alphabets_allowed
-            .allow(vec!["en".to_string(), "hi".to_string()])
-            .unwrap();
-
-        let mut data_options = DataOptions::default();
-        data_options
-            .include_asciimath(true)
-            .include_latex(true)
-            .include_mathml(true)
-            .include_svg(false)
-            .include_table_html(false)
-            .include_tsv(false);
-
-        let formats = vec![TextFormats::Text, TextFormats::LaTeXStyled];
-
-        let mut text_body_options = TextBodyOptions::default();
-        text_body_options
-            .alphabets_allowed(alphabets_allowed.clone())
-            .confidence_rate_threshold(0.42)
-            .confidence_threshold(0.66)
-            .auto_rotate_confidence_threshold(0.13)
-            .data_options(data_options.clone())
-            .formats(formats.clone())
-            .include_detected_alphabets(true)
-            .numbers_default_to_math(false)
-            .rm_fonts(true)
-            .rm_spaces(false)
-            .include_line_data(false)
-            .include_geometry_data(false)
-            .include_inchi(false)
-            .include_smiles(false)
-            .include_word_data(false);
-
-        let expected = TextBodyOptions {
-            metadata: None,
-            formats: Some(formats),
-            data_options: Some(data_options),
-            alphabets_allowed: Some(alphabets_allowed),
-            include_detected_alphabets: Some(true),
-            confidence_rate_threshold: Some(0.42),
-            confidence_threshold: Some(0.66),
-            include_line_data: Some(false),
-            include_geometry_data: Some(false),
-            include_inchi: Some(false),
-            include_smiles: Some(false),
-            include_word_data: Some(false),
-            auto_rotate_confidence_threshold: Some(0.13),
-            numbers_default_to_math: Some(false),
-            rm_fonts: Some(true),
-            rm_spaces: Some(false),
-        };
-        assert_eq!(text_body_options, expected)
-    } //}}}
-
-    #[test]
-    fn builder_formats_text_body_options() {
-        //{{{
-        let mut text_body_options = TextBodyOptions::default();
+        let mut text_body_options = TextOptions::default();
         text_body_options.format(TextFormats::Data);
         text_body_options.add_formats(vec![TextFormats::LaTeXStyled, TextFormats::Html]);
-        let mut expected = TextBodyOptions::default();
+        let mut expected = TextOptions::default();
         expected.formats = Some(vec![
             TextFormats::Data,
             TextFormats::LaTeXStyled,
             TextFormats::Html,
         ]);
-        assert_eq!(text_body_options, expected);
-    } //}}}
-
-    #[test]
-    fn builder_data_options_text_body_options() {
-        //{{{
-        let mut text_body_options = TextBodyOptions::default();
-        text_body_options
-            .include_asciimath(true)
-            .include_latex(true)
-            .include_mathml(true)
-            .include_svg(true)
-            .include_table_html(true)
-            .include_tsv(true);
-        let mut expected = TextBodyOptions::default();
-        expected.data_options = Some(DataOptions {
-            include_asciimath: Some(true),
-            include_latex: Some(true),
-            include_mathml: Some(true),
-            include_svg: Some(true),
-            include_table_html: Some(true),
-            include_tsv: Some(true),
-        });
         assert_eq!(text_body_options, expected);
     } //}}}
 }

@@ -1,9 +1,9 @@
-pub use super::shared_objects::Data;
+pub use super::super::shared_objects::response::Data;
 use serde::Deserialize;
 
 // pub struct ResponseStrokes {{{
 #[derive(Debug, Deserialize)]
-pub struct ResponseStrokes {
+pub struct StrokesResponse {
     /// Recognized `text` format, if such is found
     pub text: Option<String>,
     /// Estimated probability 100% correct

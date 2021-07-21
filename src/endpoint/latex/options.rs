@@ -1,22 +1,9 @@
-pub use super::shared_objects::{CallBack, ImageSrc, MetaData};
+use super::super::shared_objects::request::{CallBack, ImageSrc, MetaData};
 use serde::Serialize;
 
-// LaTeXBody {{{
-#[derive(Serialize, Debug)]
-/// This structs contains the possible items that the _latex_ endpoint accepts
-pub struct LaTeXBody {
-    /// > Image data, or public URL where image is located
-    pub src: ImageSrc,
-    /// > String postprocessing formats (see [Formatting](https://docs.mathpix.com/?shell#formatting-2) section)
-    pub formats: Vec<LaTeXFormats>,
-    /// Configuration options for the _latex_ endpoint
-    #[serde(flatten)]
-    pub options: LaTeXBodyOptions,
-} //}}}
-
-// LaTeXBodyOptions {{{
+// LaTeXOptions {{{
 #[derive(Debug, Serialize, PartialEq)]
-pub struct LaTeXBodyOptions {
+pub struct LaTeXOptions {
     /// > Process only math `["math"]` or both math and text `["math", "text"]`
     pub ocr: Option<Vec<Ocr>>,
     /// > Options for specific formats (see [Formatting](https://docs.mathpix.com/?shell#format-options) section)
@@ -45,9 +32,9 @@ pub struct LaTeXBodyOptions {
     pub auto_rotate_confidence_threshold: Option<f32>,
 }
 
-impl Default for LaTeXBodyOptions {
+impl Default for LaTeXOptions {
     fn default() -> Self {
-        LaTeXBodyOptions {
+        LaTeXOptions {
             ocr: None,
             format_options: None,
             skip_recrop: None,
@@ -63,7 +50,7 @@ impl Default for LaTeXBodyOptions {
     }
 }
 
-impl LaTeXBodyOptions {
+impl LaTeXOptions {
     field_builder![ocr, Vec<Ocr>];
     field_builder![format_options, FormatOptions];
     field_builder![skip_recrop, bool];
@@ -167,6 +154,7 @@ pub struct Region {
 // TESTS {{{
 #[cfg(test)]
 mod test {
+    use super::super::*;
     use super::*;
     use reqwest::Url;
     use serde_json::{json, Value::Null};
@@ -246,7 +234,7 @@ mod test {
     } //}}}
 
     #[test]
-    fn serialize_latexbody() {
+    fn serialize_latex() {
         //{{{
         let url = Url::parse("https://www.duckduckgo.com/").unwrap();
         let src = ImageSrc::Url(url);
@@ -270,7 +258,7 @@ mod test {
             height: Some(666),
         });
 
-        let latex_body_opts = LaTeXBodyOptions {
+        let latex_body_opts = LaTeXOptions {
             ocr,
             format_options,
             skip_recrop: Some(false),
@@ -284,7 +272,7 @@ mod test {
             auto_rotate_confidence_threshold: Some(0.5),
         };
 
-        let latex_body = LaTeXBody {
+        let latex_body = LaTeX {
             src,
             formats,
             options: latex_body_opts,
@@ -340,8 +328,8 @@ mod test {
             height: Some(42),
         };
 
-        let mut latex_body_options = LaTeXBodyOptions::default();
-        latex_body_options
+        let mut latex_options = LaTeXOptions::default();
+        latex_options
             .ocr(vec![Ocr::Math, Ocr::Text])
             .format_options(format_options.clone())
             .skip_recrop(true)
@@ -353,7 +341,7 @@ mod test {
             .include_detected_alphabets(true)
             .auto_rotate_confidence_threshold(0.42)
             .region(region.clone());
-        let expected = LaTeXBodyOptions {
+        let expected = LaTeXOptions {
             ocr: Some(vec![Ocr::Math, Ocr::Text]),
             format_options: Some(format_options),
             skip_recrop: Some(true),
@@ -366,7 +354,7 @@ mod test {
             n_best: Some(4),
             region: Some(region),
         };
-        assert_eq!(latex_body_options, expected);
+        assert_eq!(latex_options, expected);
     } //}}}
 }
 // }}}

@@ -45,12 +45,7 @@ pub struct DataOptions {
 }
 
 impl DataOptions {
-    field_builder![include_asciimath, bool];
-    field_builder![include_latex, bool];
-    field_builder![include_mathml, bool];
-    field_builder![include_svg, bool];
-    field_builder![include_table_html, bool];
-    field_builder![include_tsv, bool];
+    // TODO:  <21-07-21, kunzaatko> //
 }
 
 impl Default for DataOptions {
@@ -213,28 +208,6 @@ mod test {
             "include_tsv" : Null,
         });
         assert_eq!(serialized, acctual);
-    } //}}}
-
-    #[test]
-    fn builder_data_options() {
-        //{{{
-        let mut data_options = DataOptions::default();
-        data_options
-            .include_asciimath(true)
-            .include_latex(true)
-            .include_mathml(true)
-            .include_svg(false)
-            .include_table_html(false)
-            .include_tsv(false);
-        let expected = DataOptions {
-            include_asciimath: Some(true),
-            include_latex: Some(true),
-            include_mathml: Some(true),
-            include_svg: Some(false),
-            include_table_html: Some(false),
-            include_tsv: Some(false),
-        };
-        assert_eq!(data_options, expected);
     } //}}}
 }
 //}}}

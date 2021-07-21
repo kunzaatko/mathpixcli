@@ -1,9 +1,9 @@
-pub use super::shared_objects::{DetectedAlphabets, ErrorInfo, Position};
+pub use super::super::shared_objects::response::{DetectedAlphabets, ErrorInfo, Position};
 use serde::Deserialize;
 
-// pub struct ResponseLaTeX {{{
+// pub struct LaTeXResponse {{{
 #[derive(Debug, Deserialize)]
-pub struct ResponseLaTeX {
+pub struct LaTeXResponse {
     /// Recognized `text` format
     pub text: Option<String>,
     /// Recognized `text_display` format
@@ -46,4 +46,12 @@ pub struct ResponseLaTeX {
 // }}}
 
 #[derive(Debug, Deserialize)]
-pub struct Candidates {}
+pub struct Candidates {
+    // TODO:  <21-07-21, kunzaatko> //
+}
+
+// TESTS {{{
+#[cfg(test)]
+mod test {
+    // TODO:  <21-07-21, kunzaatko> //
+}

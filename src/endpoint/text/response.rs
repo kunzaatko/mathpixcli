@@ -1,11 +1,11 @@
-pub use super::shared_objects::{
+pub use super::super::shared_objects::response::{
     Data, DetectedAlphabets, ErrorInfo, GeometryData, LineData, WordData,
 };
 use serde::Deserialize;
 
-// pub struct ResponseText {{{
+// pub struct TextResponse {{{
 #[derive(Debug, Deserialize)]
-pub struct ResponseText {
+pub struct TextResponse {
     /// Request ID, for debugging purposes
     pub request_id: String,
     /// Recognized `text` format, if such is found

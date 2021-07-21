@@ -1,24 +1,9 @@
-pub use super::shared_objects::{DataOptions, MetaData};
+pub use super::super::shared_objects::request::{DataOptions, MetaData};
 use serde::Serialize;
-use serde_json::Value as JsonValue;
 
-// StrokesBody {{{
+// StrokesOptions {{{
 #[derive(Serialize, Debug)]
-/// This structs contains the possible items that the _strokes_ endpoint accepts
-pub struct StrokesBody {
-    // NOTE: on construction, `is_array(&self)` should be used to check whether it is an array.
-    // Also eltype should be Number (`is_number(&self)`)
-    /// > Strokes in JSON with appropriate format.
-    pub strokes: JsonValue,
-    /// Configuration options for the _strokes_ endpoint
-    #[serde(flatten)]
-    pub options: StrokesBodyOptions,
-}
-// }}}
-
-// StrokesBodyOptions {{{
-#[derive(Serialize, Debug)]
-pub struct StrokesBodyOptions {
+pub struct StrokesOptions {
     /// > Key value object
     pub metadata: Option<MetaData>,
     /// > List of formats, one of `text`, `data`, `html`
@@ -27,9 +12,9 @@ pub struct StrokesBodyOptions {
     pub data_options: Option<DataOptions>,
 }
 
-impl Default for StrokesBodyOptions {
+impl Default for StrokesOptions {
     fn default() -> Self {
-        StrokesBodyOptions {
+        Self {
             metadata: None,
             formats: None,
             data_options: None,

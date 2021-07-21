@@ -1,23 +1,31 @@
-pub use super::shared_objects::{AlphabetsAllowed, MetaData};
+mod error;
+mod options;
+mod response;
+
+pub use super::shared_objects::request::{AlphabetsAllowed, MetaData};
+use error::PDFError;
+pub use options::PDFOptions;
 use reqwest::Url;
-use serde::ser::{SerializeStruct, Serializer};
-use serde::Serialize;
-use std::convert::TryFrom;
-use std::path::PathBuf;
+use response::PDFResponse;
+use serde::{
+    ser::{SerializeStruct, Serializer},
+    Serialize,
+};
+use std::{convert::TryFrom, path::PathBuf};
 
 const PDF_EXTENSIONS: &[&str] = &["pdf"];
 
-// PDFBody {{{
+// PDF {{{
 #[derive(Debug)]
 /// This structs contains the possible items that the _text_ endpoint accepts
-pub struct PDFBody {
+pub struct PDF {
     /// > Source of PDF
     pub src: PDFSrc,
     /// > Configuration options for the _PDF_ endpoint
-    pub options: PDFBodyOptions,
+    pub options: PDFOptions,
 }
 
-impl Serialize for PDFBody {
+impl Serialize for PDF {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
         S: Serializer,
@@ -29,9 +37,6 @@ impl Serialize for PDFBody {
         state.end()
     }
 } //}}}
-
-#[derive(Debug, Default, Serialize)]
-pub struct PDFBodyOptions {}
 
 /// A checked pdf file path
 #[derive(Debug)]
@@ -72,21 +77,22 @@ pub enum PDFSrc {
 // TESTS {{{
 #[cfg(test)]
 mod test {
-    use super::{PDFBody, PDFBodyOptions, PDFSrc};
+    use super::{PDFOptions, PDFSrc, PDF};
     use reqwest::Url;
     use serde_json::json;
 
     #[test]
-    fn serialize_pdfbody() {
-        let pdf_body = PDFBody {
+    fn serialize_pdf() {
+        // {{{
+        let pdf_body = PDF {
             src: PDFSrc::Url(Url::parse("https://www.duckduckgo.com/").unwrap()),
-            options: PDFBodyOptions::default(),
+            options: PDFOptions::default(),
         };
         let serilized = serde_json::to_value(pdf_body).unwrap();
         let expected = json!({
             "url" : "https://www.duckduckgo.com/"
         });
         assert_eq!(serilized, expected);
-    }
+    } // }}}
 }
 // }}}
