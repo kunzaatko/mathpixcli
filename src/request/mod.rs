@@ -1,13 +1,13 @@
 /// Common part of the URL for all the API endpoints
 pub const MATHPIX_APIURL: &str = "https://api.mathpix.com/v3/";
 
-// pub mod body; {{{
+// pub mod endpoint; {{{
 /**
 The body for the endpoints that the API provides all look different. This module implements a
 structure for every endpoint that adheres to what the enpoint expects to be the body of the
 request.
 */
-pub mod body; //}}}
+pub mod endpoint; //}}}
 
 // pub mod header; {{{
 /**
@@ -44,6 +44,7 @@ where
     // Self::Response: Sized + serde::Deserialize<'a> + TryFrom<reqwest::Response>,
     <Self::Response as TryFrom<reqwest::Response>>::Error: Into<Self::Error>,
     <Self as MathpixEndpoint>::Error: From<std::convert::Infallible>,
+    // TODO: Should this be even possible? <21-07-21, kunzaatko> //
     <Self as MathpixEndpoint>::Response: From<reqwest::Response>,
 {
     /// What can be sent through to the endpoint to OCR.
@@ -128,7 +129,7 @@ where
     fn url(&self) -> reqwest::Url;
 }
 
-pub use body::Body;
+pub use endpoint::Body;
 pub use header::AuthHeader;
 
 #[derive(Debug)]
@@ -137,7 +138,7 @@ pub struct Request {
     body: Body,
 }
 
-use body::pdf::PDFSrc;
+use endpoint::pdf::PDFSrc;
 
 impl Request {
     /// Get the url that is appropriate for the endpoint
@@ -177,7 +178,7 @@ impl Request {
 // TESTS {{{
 #[cfg(test)]
 mod test {
-    use super::body::text::{self, TextBody, TextBodyOptions};
+    use super::endpoint::text::{self, TextBody, TextBodyOptions};
     use super::{AuthHeader, Body, Request};
     use std::convert::TryInto;
     use std::path::PathBuf;
