@@ -1,8 +1,11 @@
 use reqwest::Url;
 use serde::{Serialize, Serializer};
 
-pub mod base64image;
-pub use base64image::Base64Image;
+mod base64image;
+pub use base64image::{Base64Image, Base64ImageError};
+use num_traits::bounds::Bounded;
+use std::convert::TryFrom;
+use thiserror::Error;
 
 // ImageSrc {{{
 #[derive(Debug)]
@@ -152,7 +155,63 @@ impl AlphabetsAllowed {
         }
         Ok(())
     }
+
+    pub fn all_false(&self) -> bool {
+        self == &AlphabetsAllowed {
+            en: Some(false),
+            hi: Some(false),
+            zh: Some(false),
+            ja: Some(false),
+            ko: Some(false),
+            ru: Some(false),
+            th: Some(false),
+        }
+    }
 }
+// }}}
+
+// ConfidenceThreshold {{{
+#[derive(Debug, PartialEq, Clone, PartialOrd)]
+/// A confidence threshold value between 0 and 1
+pub struct ConfidenceThreshold {
+    value: f32,
+}
+
+impl Bounded for ConfidenceThreshold {
+    fn max_value() -> Self {
+        ConfidenceThreshold { value: 1.0 }
+    }
+    fn min_value() -> Self {
+        ConfidenceThreshold { value: 0.0 }
+    }
+}
+
+impl TryFrom<f32> for ConfidenceThreshold {
+    type Error = ConfidenceThresholdError;
+    fn try_from(value: f32) -> Result<Self, Self::Error> {
+        if 0.0 <= value && value <= 1.0 {
+            Ok(Self { value })
+        } else {
+            Err(ConfidenceThresholdError::ValueOutOfBoundsError(value))
+        }
+    }
+}
+
+impl Serialize for ConfidenceThreshold {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        serializer.serialize_f32(self.value)
+    }
+}
+
+#[derive(Debug, Error)]
+pub enum ConfidenceThresholdError {
+    #[error("{0} is out of bounds. Confidence threshold must be a value between 0.0 and 1.0.")]
+    ValueOutOfBoundsError(f32),
+}
+
 // }}}
 
 // TESTS {{{

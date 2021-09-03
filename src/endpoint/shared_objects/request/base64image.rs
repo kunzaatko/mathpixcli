@@ -3,6 +3,7 @@ use mime::{Mime, IMAGE_JPEG, IMAGE_PNG};
 use serde::{Serialize, Serializer};
 use std::convert::TryFrom;
 use std::path::PathBuf;
+use thiserror::Error;
 
 const JPEG_EXTENSIONS: &[&str] = &["jpg", "jpeg", "jpe", "jif", "jfif", "jfi"];
 const PNG_EXTENSIONS: &[&str] = &["png"];
@@ -13,13 +14,30 @@ pub struct Base64Image {
     img_mime: Mime,
 }
 
+#[derive(Error, Debug)]
+pub enum Base64ImageError {
+    ExtensionError(String),
+    FileTypeError(String),
+}
+
+impl std::fmt::Display for Base64ImageError {
+    //{{{
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Base64ImageError::ExtensionError(context) => write!(f, "ExtensionError: {}", context),
+            Base64ImageError::FileTypeError(context) => write!(f, "FileTypeError: {}", context),
+        }
+    }
+} //}}}
+
 impl TryFrom<PathBuf> for Base64Image {
     //{{{
-    type Error = String;
+    type Error = Base64ImageError;
     fn try_from(path: PathBuf) -> Result<Self, Self::Error> {
-        let extension = path
-            .extension()
-            .ok_or_else(|| "Extension not found or no file passed".to_string())?;
+        let extension = path.extension().ok_or(Self::Error::ExtensionError(format!(
+            "File {:?} has an invalid extension.",
+            path
+        )))?;
         let img_mime = match extension {
             // FIX: error handling <22-05-21, kunzaatko> //
             _ if JPEG_EXTENSIONS.contains(&extension.to_str().unwrap().to_lowercase().as_str()) => {
@@ -28,7 +46,12 @@ impl TryFrom<PathBuf> for Base64Image {
             _ if PNG_EXTENSIONS.contains(&extension.to_str().unwrap().to_lowercase().as_str()) => {
                 IMAGE_PNG
             }
-            _ => return Err("Unsupported filetype. jpg and png images are supported.".to_string()),
+            _ => {
+                return Err(Self::Error::FileTypeError(format!(
+                    "File {:?} has an unsupported filetype. jpg and png images are supported.",
+                    path
+                )))
+            }
         };
         Ok(Base64Image {
             img_path: path,
@@ -62,7 +85,7 @@ impl Serialize for Base64Image {
 // TESTS {{{
 #[cfg(test)]
 mod test {
-    use super::Base64Image;
+    use super::*;
     use mime::IMAGE_JPEG;
     use serde_json::json;
     use std::convert::TryInto;
@@ -83,6 +106,28 @@ mod test {
     } //}}}
 
     #[test]
+    fn base64image_from_pathbuf_no_extension() {
+        // {{{
+        let base64image: Result<Base64Image, Base64ImageError> =
+            PathBuf::from("./test/assets/test_encode_base64".to_string()).try_into();
+        assert!(match base64image {
+            Err(Base64ImageError::ExtensionError(_)) => true,
+            _ => false,
+        })
+    } //}}}
+
+    #[test]
+    fn base64image_from_pathbuf_invalid_filetype() {
+        // {{{
+        let base64image: Result<Base64Image, Base64ImageError> =
+            PathBuf::from("./test/assets/test_encode_base64.txt".to_string()).try_into();
+        assert!(match base64image {
+            Err(Base64ImageError::FileTypeError(_)) => true,
+            _ => false,
+        })
+    } // }}}
+
+    #[test]
     fn base64_from_pathbuf_upercase_extension() {
         //{{{
         let base64image: Base64Image =
@@ -94,8 +139,7 @@ mod test {
             img_mime: IMAGE_JPEG,
         };
         assert_eq!(base64image, acctual);
-        //}}}
-    }
+    } //}}}
 
     #[test]
     fn base64image_to_string() {

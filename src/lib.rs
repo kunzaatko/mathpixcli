@@ -1,3 +1,4 @@
+#![allow(unused_imports, dead_code)]
 /*!
 This is a crate for creating [API](https://docs.mathpix.com/?shell#introduction) requests for Mathpix.
 `MathpixAPI` uses the `reqwest` crate for making the requests and `serde_json` for serializing the

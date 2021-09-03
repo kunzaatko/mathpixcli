@@ -1,11 +1,17 @@
 pub use super::super::shared_objects::request::{
-    AlphabetsAllowed, Base64Image, DataOptions, ImageSrc, MetaData,
+    AlphabetsAllowed, Base64Image, ConfidenceThreshold, DataOptions, ImageSrc, MetaData,
 };
+use super::error::{
+    BadOptionError, ConfidenceThresholdError, LogicalFallacyError, TextOptionsError,
+    UnreasonableOptionsError,
+};
+use rayon::prelude::*;
 use serde::Serialize;
+use std::convert::TryInto;
 
-// TextBodyOptions {{{
 #[derive(Serialize, Debug, PartialEq)]
 pub struct TextOptions {
+    // {{{
     /// > Key value object
     pub metadata: Option<MetaData>,
     /// > List of formats, one of `text`, `data`, `html`, `latex_styled`, see [Format Descriptions](https://docs.mathpix.com/?shell#format-descriptions)
@@ -18,10 +24,10 @@ pub struct TextOptions {
     pub alphabets_allowed: Option<AlphabetsAllowed>,
     // TODO: Add the num bounded trait (is between 0 and 1) <30-04-21, kunzaatko> //
     /// > Specifies threshold for triggering confidence errors
-    pub confidence_threshold: Option<f32>,
+    pub confidence_threshold: Option<ConfidenceThreshold>,
     // TODO: Add the num bounded trait (is between 0 and 1) <30-04-21, kunzaatko> //
     /// > Specifies threshold for triggering confidence errors, default `0.75` (symbol level threshold)
-    pub confidence_rate_threshold: Option<f32>,
+    pub confidence_rate_threshold: Option<ConfidenceThreshold>,
     /// > Specifies whether to return information segmented line by line, see [LineData](https://docs.mathpix.com/?shell#linedata-object) object section for details
     pub include_line_data: Option<bool>,
     /// > Specifies whether to return information segmented word by word, see [WordData](https://docs.mathpix.com/?shell#worddata-object) object section for details
@@ -34,16 +40,17 @@ pub struct TextOptions {
     pub include_geometry_data: Option<bool>,
     // TODO: Add the num bounded trait (is between 0 and 1) <30-04-21, kunzaatko> //
     /// > Specifies threshold for auto rotating image to correct orientation; by default it is set to `0.99`, can be disabled with a value of `1` (see [Auto rotation](https://docs.mathpix.com/?shell#auto-rotation) section for details)
-    pub auto_rotate_confidence_threshold: Option<f32>,
+    pub auto_rotate_confidence_threshold: Option<ConfidenceThreshold>,
     /// > Determines whether extra white space is removed from equations in `latex_styled` and `text` formats. Default is `true`.
     pub rm_spaces: Option<bool>,
     /// > Determines whether font commands such as `\mathbf` and `\mathrm` are removed from equations in `latex_styled` and `text` formats. Default is `false`.
     pub rm_fonts: Option<bool>,
     /// > Specifies whether numbers are always math, e.g., `Answer: \( 17 \)` instead of `Answer: 17`. Default is `false`.
     pub numbers_default_to_math: Option<bool>,
-}
+} // }}}
 
 impl Default for TextOptions {
+    // {{{
     fn default() -> Self {
         TextOptions {
             metadata: None,
@@ -64,39 +71,305 @@ impl Default for TextOptions {
             numbers_default_to_math: None,
         }
     }
-}
+} // }}}
 
 impl TextOptions {
-    pub fn add_formats(&mut self, mut formats: Vec<TextFormats>) -> &mut Self {
-        if let Some(self_formats) = &mut (self.formats) {
-            self_formats.append(&mut formats);
-        } else {
-            self.formats = Some(formats);
-        }
-        self
+    //{{{
+    // type Error = TextOptionsError;
+
+    pub fn set_metadata(&mut self) -> &mut Self {
+        //  Option<MetaData>
+        todo!()
     }
 
-    pub fn format(&mut self, format: TextFormats) -> &mut Self {
+    /// Add formats to the options of the request
+    /// * possible inputs are "text", "data", "html" and "latex_styled"
+    ///
+    /// # Examples
+    /// ```
+    /// use mathpixapi::endpoint::text::{TextOptions, TextFormats};
+    /// let mut options = TextOptions::default();
+    /// options.add_formats_from_strings(&["text", "data"]).unwrap().add_formats_from_strings(&["html"]).unwrap();
+    /// let mut expected = TextOptions::default();
+    /// expected.formats = Some(vec![TextFormats::Text, TextFormats::Data,
+    /// TextFormats::Html]);
+    /// assert_eq!(options, expected);
+    /// ```
+
+    pub fn add_formats_from_strings<S: AsRef<str>>(
+        &mut self,
+        formats: &[S],
+    ) -> Result<&mut Self, TextOptionsError> {
+        //{{{
+        if self.formats == None && !formats.is_empty() {
+            self.formats = Some(Vec::new());
+        }
+        if let Some(self_formats) = &mut self.formats {
+            for format in formats {
+                match format.as_ref() {
+                    "text" => self_formats.push(TextFormats::Text),
+                    "data" => self_formats.push(TextFormats::Data),
+                    "html" => self_formats.push(TextFormats::Html),
+                    "latex_styled" => self_formats.push(TextFormats::LaTeXStyled),
+                    format => return Err(BadOptionError::BadTextFormat(format.into()).into()),
+                }
+            }
+        }
+        Ok(self)
+    } //}}}
+
+    pub fn add_formats(&mut self, formats: &[TextFormats]) -> &mut Self {
+        //{{{
+        if let Some(self_formats) = &mut self.formats {
+            self_formats.append(&mut formats.to_vec());
+        } else {
+            self.formats = Some(formats.to_vec());
+        }
+        self
+    } //}}}
+
+    pub fn add_format(&mut self, format: TextFormats) -> &mut Self {
+        //{{{
         if let Some(formats) = &mut (self.formats) {
             formats.push(format);
         } else {
             self.formats = Some(vec![format]);
         }
         self
-    }
-}
-// }}}
+    } //}}}
 
-// TextFormats {{{
+    pub fn add_data_options_from_strings<S: AsRef<str>>(
+        &mut self,
+        data_options: &[S],
+    ) -> Result<&mut Self, TextOptionsError> {
+        //{{{
+        if self.data_options == None && !data_options.is_empty() {
+            self.data_options = Some(DataOptions::default());
+        }
+        if let Some(self_data_options) = &mut self.data_options {
+            for data_option in data_options {
+                match data_option.as_ref() {
+                    "include_asciimath" => self_data_options.include_asciimath = Some(true),
+                    "noinclude_asciimath" | "!include_asciimath" => {
+                        self_data_options.include_asciimath = Some(false)
+                    }
+                    "include_latex" => self_data_options.include_latex = Some(true),
+                    "noinclude_latex" | "!include_latex" => {
+                        self_data_options.include_latex = Some(false)
+                    }
+                    "include_mathml" => self_data_options.include_mathml = Some(true),
+                    "noinclude_mathml" | "!include_mathml" => {
+                        self_data_options.include_mathml = Some(false)
+                    }
+                    "include_svg" => self_data_options.include_svg = Some(true),
+                    "noinclude_svg" | "!include_svg" => self_data_options.include_svg = Some(false),
+                    "include_table_html" => self_data_options.include_table_html = Some(true),
+                    "noinclude_table_html" | "!include_table_html" => {
+                        self_data_options.include_table_html = Some(false)
+                    }
+                    "include_tsv" => self_data_options.include_tsv = Some(true),
+                    "noinclude_tsv" | "!include_tsv" => self_data_options.include_tsv = Some(false),
+                    data_option => {
+                        return Err(BadOptionError::BadDataOption(data_option.into()).into())
+                    }
+                }
+            }
+        }
+        Ok(self)
+    } //}}}
+
+    pub fn include_detected_alphabets(&mut self, val: bool) -> &mut Self {
+        //{{{
+        self.include_detected_alphabets = Some(val);
+        self
+    } //}}}
+
+    pub fn set_alphabets_allowed<S: AsRef<str> + Eq>(
+        &mut self,
+        alphabets: &[S],
+    ) -> Result<&mut Self, TextOptionsError> {
+        // {{{
+        if self.alphabets_allowed == None && !alphabets.is_empty() {
+            self.alphabets_allowed = Some(AlphabetsAllowed::default());
+        }
+
+        // NOTE: check for logical fallacies (ex. "noen" and "en" are both in the vector of options) <25-07-21, kunzaatko> //
+        let mut err =
+            TextOptionsError::LogicalFallacy(LogicalFallacyError::AlphabetsAllowedLogicalFallacy {
+                true_alphabet: String::new(),
+                false_alphabet: String::new(),
+            });
+        let alphabets_as_ref: Vec<&str> = alphabets.iter().map(|x| x.as_ref()).collect();
+        let mut has_logical_fallacy = |alpha: &str| -> bool {
+            //{{{
+            let mut noalpha = "no".to_string();
+            noalpha.push_str(alpha);
+            let mut excl_alpha = "!".to_string();
+            excl_alpha.push_str(alpha);
+
+            let fallacy = alphabets_as_ref.contains(&alpha)
+                && (alphabets_as_ref.contains(&excl_alpha.as_ref())
+                    || alphabets_as_ref.contains(&noalpha.as_ref()));
+            let mut true_alphabet = String::new();
+            let mut false_alphabet = String::new();
+            if fallacy == true {
+                true_alphabet = alpha.to_string();
+                false_alphabet = if alphabets_as_ref.contains(&excl_alpha.as_ref()) == true {
+                    excl_alpha
+                } else {
+                    noalpha
+                };
+            }
+            err = LogicalFallacyError::AlphabetsAllowedLogicalFallacy {
+                true_alphabet,
+                false_alphabet,
+            }
+            .into();
+            fallacy
+        }; //}}}
+
+        for alphabet in &alphabets_as_ref {
+            // NOTE: This works because all of the alphabets have 2 characters <25-07-21, kunzaatko> //
+            if alphabet.chars().count() == 2 {
+                if has_logical_fallacy(alphabet) {
+                    return Err(err);
+                }
+            }
+        }
+
+        if let Some(self_alphabets_allowed) = &mut self.alphabets_allowed {
+            for alphabet in alphabets {
+                match alphabet.as_ref() {
+                    "en" => self_alphabets_allowed.en = Some(true),
+                    "noen" | "!en" => self_alphabets_allowed.en = Some(false),
+                    "hi" => self_alphabets_allowed.hi = Some(true),
+                    "nohi" | "!hi" => self_alphabets_allowed.hi = Some(false),
+                    "zh" => self_alphabets_allowed.zh = Some(true),
+                    "nozh" | "!zh" => self_alphabets_allowed.zh = Some(false),
+                    "ja" => self_alphabets_allowed.ja = Some(true),
+                    "noja" | "!ja" => self_alphabets_allowed.ja = Some(false),
+                    "ko" => self_alphabets_allowed.ko = Some(true),
+                    "noko" | "!ko" => self_alphabets_allowed.ko = Some(false),
+                    "ru" => self_alphabets_allowed.ru = Some(true),
+                    "noru" | "!ru" => self_alphabets_allowed.ru = Some(false),
+                    "th" => self_alphabets_allowed.th = Some(true),
+                    "noth" | "!th" => self_alphabets_allowed.th = Some(false),
+                    "all" => {
+                        *self_alphabets_allowed = AlphabetsAllowed {
+                            en: Some(true),
+                            hi: Some(true),
+                            zh: Some(true),
+                            ja: Some(true),
+                            ko: Some(true),
+                            ru: Some(true),
+                            th: Some(true),
+                        };
+                    }
+                    alphabet => {
+                        return Err(BadOptionError::BadAlphabetAllowed(alphabet.to_string()).into());
+                    }
+                }
+            }
+        }
+
+        if let Some(self_alphabets_allowed) = &self.alphabets_allowed {
+            if (&self_alphabets_allowed).all_false() {
+                return Err(UnreasonableOptionsError::NoAlphabetsAllowed.into());
+                // TODO:  <25-07-21, kunzaatko> //
+            }
+        }
+        Ok(self)
+    } //}}}
+
+    pub fn confidence_threshold(&mut self, val: f32) -> Result<&mut Self, TextOptionsError> {
+        //{{{
+        let confidence_threshold_result = val.try_into();
+        if let Ok(confidence_threshold) = confidence_threshold_result {
+            self.confidence_threshold = Some(confidence_threshold);
+        } else {
+            confidence_threshold_result.map_err::<BadOptionError, _>(|e| e.into())?;
+        }
+        Ok(self)
+    } //}}}
+
+    pub fn confidence_rate_threshold<F: Into<f32>>(
+        &mut self,
+        val: F,
+    ) -> Result<&mut Self, TextOptionsError> {
+        //{{{
+        let confidence_rate_threshold_result = val.into().try_into();
+        if let Ok(confidence_rate_threshold) = confidence_rate_threshold_result {
+            self.confidence_rate_threshold = Some(confidence_rate_threshold);
+        } else {
+            confidence_rate_threshold_result.map_err::<BadOptionError, _>(|e| e.into())?;
+        }
+        Ok(self)
+    } //}}}
+
+    pub fn include_line_data(&mut self, val: bool) -> &mut Self {
+        self.include_line_data = Some(val);
+        self
+    }
+
+    pub fn include_word_data(&mut self, val: bool) -> &mut Self {
+        self.include_word_data = Some(val);
+        self
+    }
+
+    pub fn include_smiles(&mut self, val: bool) -> &mut Self {
+        self.include_smiles = Some(val);
+        self
+    }
+
+    pub fn include_inchi(&mut self, val: bool) -> &mut Self {
+        self.include_inchi = Some(val);
+        self
+    }
+    pub fn include_geometry_data(&mut self, val: bool) -> &mut Self {
+        self.include_geometry_data = Some(val);
+        self
+    }
+
+    pub fn auto_rotate_confidence_threshold<F: Into<f32>>(
+        &mut self,
+        val: F,
+    ) -> Result<&mut Self, TextOptionsError> {
+        //{{{
+        let auto_rotate_confidence_threshold_result = val.into().try_into();
+        if let Ok(auto_rotate_confidence_threshold) = auto_rotate_confidence_threshold_result {
+            self.auto_rotate_confidence_threshold = Some(auto_rotate_confidence_threshold);
+        } else {
+            auto_rotate_confidence_threshold_result.map_err::<BadOptionError, _>(|e| e.into())?;
+        }
+        Ok(self)
+    } //}}}
+
+    pub fn rm_spaces(&mut self, val: bool) -> &mut Self {
+        self.rm_spaces = Some(val);
+        self
+    }
+
+    pub fn rm_fonts(&mut self, val: bool) -> &mut Self {
+        self.rm_fonts = Some(val);
+        self
+    }
+
+    pub fn numbers_default_to_math(&mut self, val: bool) -> &mut Self {
+        self.numbers_default_to_math = Some(val);
+        self
+    }
+} //}}}
+
 /// Format specifications possible for the _text_ endpoint
 #[derive(Debug, Serialize, PartialEq, Clone)]
 #[serde(rename_all = "snake_case")]
 pub enum TextFormats {
+    //{{{
     /// > Mathpix markdown formatted text
     Text,
     /// > HTML rendered from `text` via mathpix-markdown-it
     Html,
-    /// > Data extracte from `html` as specified in the `data_options` request parameter
+    /// > Data extracted from `html` as specified in the `data_options` request parameter
     Data,
     /**
     > Styled LaTeX, returned only in cases that the whole image can be reduces to a single
@@ -268,9 +541,9 @@ mod test {
             metadata: None,
             formats: Some(vec![TextFormats::Text, TextFormats::Data]),
             alphabets_allowed: Some(alphabets_allowed),
-            auto_rotate_confidence_threshold: Some(1.),
-            confidence_threshold: Some(1.),
-            confidence_rate_threshold: Some(1.),
+            auto_rotate_confidence_threshold: Some(1.0.try_into().unwrap()),
+            confidence_threshold: Some(1.0.try_into().unwrap()),
+            confidence_rate_threshold: Some(1.0.try_into().unwrap()),
             data_options: Some(data_options),
             include_detected_alphabets: Some(true),
             include_geometry_data: Some(false),
@@ -329,8 +602,8 @@ mod test {
     fn builder_formats_text_options() {
         //{{{
         let mut text_body_options = TextOptions::default();
-        text_body_options.format(TextFormats::Data);
-        text_body_options.add_formats(vec![TextFormats::LaTeXStyled, TextFormats::Html]);
+        text_body_options.add_format(TextFormats::Data);
+        text_body_options.add_formats(&[TextFormats::LaTeXStyled, TextFormats::Html]);
         let mut expected = TextOptions::default();
         expected.formats = Some(vec![
             TextFormats::Data,
