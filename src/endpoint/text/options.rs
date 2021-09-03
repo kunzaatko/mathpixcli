@@ -284,7 +284,7 @@ mod test {
         };
 
         let text = Text {
-            src,
+            src: Some(src),
             options: text_opts,
         };
         let serialized = serde_json::to_value(&text).unwrap();

@@ -1,7 +1,7 @@
 use crate::header::AuthHeader;
+use async_trait::async_trait;
 use reqwest;
 use std::convert::TryInto;
-use std::future::Future;
 
 /**
 Object that are shared in multiple endpoints. Now consists of `ImageSrc` (and `Base64Image`),
@@ -110,12 +110,13 @@ Module for constructing the _text_ endpoint request, associated response structu
 pub mod text; //}}}
 
 /// The main library user interface for any of the Mathpix endpoints
+#[async_trait]
 pub trait MathpixEndpoint
 where
     Self: Sized,
     Self::Options: Default, // there should be a corresponding default that is the same as the API server default for options
     Self::Error: std::error::Error,
-    Self::Options: Sized + serde::Serialize,
+    Self::Options: serde::Serialize,
 {
     /// What can be sent through to the endpoint to OCR.
     type Src;
@@ -138,16 +139,17 @@ where
     - `options` is `Some(Self::Options)` then they are used in the constructor
     - `options` is `None` then the default options are used
     */
-    fn new<S: TryInto<Self::Src>>(
-        options: Option<Self::Options>,
-        src: S,
-    ) -> Result<Self, Self::Error>;
+    fn new<S, E>(options: Option<Self::Options>, src: S) -> Result<Self, Self::Error>
+    where
+        S: TryInto<Self::Src, Error = E>,
+        Self::Error: From<E>,
+        Self: Sized;
 
     /// Return the source that is meant for OCR
-    fn src(&self) -> Self::Src;
+    fn src(&mut self) -> Option<&mut Self::Src>;
 
     /// Return the options that are to be sent for the OCR
-    fn options(&self) -> Self::Options;
+    fn options(&mut self) -> &mut Self::Options;
 
     /**
     Send an API request to the Mathpix server with the given header.
@@ -158,10 +160,11 @@ where
     > [^certificate]: There is a free license for the API certificate available with limited request
     > numbers. For further information see the [mathpix accounts website](https://accounts.mathpix.com/ocr-api).
     */
-    fn send_request<H: Into<self::AuthHeader>, F>(&self, header: H) -> F
+    async fn send_request<H, Fut, F>(&self, header: H) -> Result<Self::Response, Self::Error>
     where
-        F: Future<Output = Result<Self::Response, Self::Error>>;
-
+        H: Into<self::AuthHeader> + std::marker::Send,
+        reqwest::Response: Into<Self::Response>,
+        reqwest::Error: Into<Self::Error>;
     /**
     Create a `reqwest::Request` from `self` with the `header`
 

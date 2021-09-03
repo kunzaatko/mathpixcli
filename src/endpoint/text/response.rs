@@ -1,6 +1,7 @@
 pub use super::super::shared_objects::response::{
     Data, DetectedAlphabets, ErrorInfo, GeometryData, LineData, WordData,
 };
+use reqwest;
 use serde::Deserialize;
 
 // pub struct TextResponse {{{
@@ -41,3 +42,9 @@ pub struct TextResponse {
     /// Error info object
     pub error_info: Option<ErrorInfo>,
 } //}}}
+
+impl From<reqwest::Response> for TextResponse {
+    fn from(_: reqwest::Response) -> Self {
+        todo!()
+    }
+}
