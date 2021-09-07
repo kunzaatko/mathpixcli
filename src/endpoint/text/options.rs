@@ -171,12 +171,15 @@ impl TextOptions {
         self
     } //}}}
 
-    pub fn add_data_options_from_strings<S: AsRef<str>>(
+    pub fn add_data_options_from_strings<S, I: IntoIterator<Item = S>>(
         &mut self,
-        data_options: &[S],
-    ) -> Result<&mut Self, TextOptionsError> {
+        data_options: I,
+    ) -> Result<&mut Self, TextOptionsError>
+    where
+        S: AsRef<str>,
+    {
         //{{{
-        if self.data_options == None && !data_options.is_empty() {
+        if self.data_options == None {
             self.data_options = Some(DataOptions::default());
         }
         if let Some(self_data_options) = &mut self.data_options {
@@ -203,7 +206,12 @@ impl TextOptions {
                     "include_tsv" => self_data_options.include_tsv = Some(true),
                     "noinclude_tsv" | "!include_tsv" => self_data_options.include_tsv = Some(false),
                     data_option => {
-                        return Err(BadOptionError::DataOption(data_option.into()).into())
+                        // NOTE: This is here in case we start with default and get an error without adding
+                        // any DataOption <07-09-21, kunzaatko> //
+                        if self_data_options == &DataOptions::default() {
+                            self.data_options = None;
+                        }
+                        return Err(BadOptionError::DataOption(data_option.into()).into());
                     }
                 }
             }
@@ -217,6 +225,7 @@ impl TextOptions {
         self
     } //}}}
 
+    // TODO: Test and add comments to this function <07-09-21, kunzaatko> //
     pub fn set_alphabets_allowed<S: AsRef<str> + Eq>(
         &mut self,
         alphabets: &[S],
@@ -536,7 +545,7 @@ mod text_options_tests {
 
         let serialized = serde_json::to_value(&text_opts).unwrap();
 
-        // NOTE: Testing serialization when TextOptions == None <07-09-21, kunzaatko> //
+        // Testing serialization when TextOptions == None
         assert_eq!(
             serialized,
             serde_json::to_value(TextOptions::default()).unwrap()
@@ -564,15 +573,98 @@ mod text_options_tests {
     fn add_format() {
         // {{{
         let mut options = TextOptions::default();
+        options.add_format(TextFormats::Text);
+        // NOTE: This is the advantage of using a HashSet because otherwise this behaviour would
+        // require special treatment <07-09-21, kunzaatko> //
+        options.add_format(TextFormats::Text);
+        assert_eq!(options.formats, Some(hashset! {TextFormats::Text}));
+    } // }}}
+
+    #[test]
+    fn add_data_options_from_strings() {
+        // {{{
+        let mut options = TextOptions::default();
+
+        // Test of adding options
         options
-            .add_formats_from_strings(["text", "data", "html", "latex_styled"])
+            .add_data_options_from_strings([
+                "include_asciimath",
+                "include_latex",
+                "include_mathml",
+                "include_svg",
+                "include_table_html",
+                "include_tsv",
+            ])
             .unwrap();
         assert_eq!(
-            options.formats,
-            Some(
-                hashset! {TextFormats::Text, TextFormats::Data, TextFormats::Html, TextFormats::LaTeXStyled}
-            )
+            Some(DataOptions {
+                include_asciimath: Some(true),
+                include_latex: Some(true),
+                include_mathml: Some(true),
+                include_svg: Some(true),
+                include_table_html: Some(true),
+                include_tsv: Some(true),
+            }),
+            options.data_options
         );
+
+        // Test of removing options
+        options
+            .add_data_options_from_strings([
+                "noinclude_latex",
+                "noinclude_mathml",
+                "noinclude_svg",
+                "noinclude_table_html",
+                "noinclude_tsv",
+            ])
+            .unwrap();
+
+        assert_eq!(
+            Some(DataOptions {
+                include_asciimath: Some(true),
+                include_latex: Some(false),
+                include_mathml: Some(false),
+                include_svg: Some(false),
+                include_table_html: Some(false),
+                include_tsv: Some(false),
+            }),
+            options.data_options
+        );
+
+        // Test of ! notation
+        options
+            .add_data_options_from_strings(["!include_asciimath"])
+            .unwrap();
+        assert_eq!(
+            Some(DataOptions {
+                include_asciimath: Some(false),
+                include_latex: Some(false),
+                include_mathml: Some(false),
+                include_svg: Some(false),
+                include_table_html: Some(false),
+                include_tsv: Some(false),
+            }),
+            options.data_options
+        );
+
+        // Test of error when unknown option
+        options.data_options = None;
+        assert!(options.add_data_options_from_strings(["error"]).is_err());
+
+        // Test when adding no option
+        assert_eq!(options.data_options, None);
+    } // }}}
+
+    #[test]
+    fn include_detected_alphabets() {
+        // {{{
+        let mut options = TextOptions::default();
+
+        options.include_detected_alphabets(true);
+        assert_eq!(options.include_detected_alphabets, Some(true));
+
+        options.include_detected_alphabets(false);
+        assert_eq!(options.include_detected_alphabets, Some(false));
     } // }}}
 
     #[test]
