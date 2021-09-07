@@ -151,6 +151,11 @@ impl TextOptions {
             self.formats = Some(HashSet::new());
             self.add_formats(formats);
         }
+        if let Some(self_formats) = &self.formats {
+            if self_formats.is_empty() {
+                self.formats = None;
+            }
+        }
         self
     } //}}}
 
@@ -422,6 +427,7 @@ impl ToString for TextFormats {
 mod text_options_tests {
     use super::super::super::shared_objects::request::Base64Image;
     use super::super::{AlphabetsAllowed, DataOptions, ImageSrc, Text, TextFormats, TextOptions};
+    use super::TextOptionsError;
     use serde_json::{json, Value::Null};
     use std::convert::TryInto;
     use std::path::PathBuf;
@@ -513,13 +519,61 @@ mod text_options_tests {
 
     #[test]
     fn formats_add_empty() {
+        //{{{
         let mut text_opts = TextOptions::default();
 
-        let empty_formats: [&str; 0] = [];
-        text_opts.add_formats_from_strings(empty_formats).unwrap();
+        let empty_formats_strs: [&str; 0] = [];
+        text_opts
+            .add_formats_from_strings(empty_formats_strs)
+            .unwrap();
 
         assert_eq!(text_opts.formats, Option::None);
-    }
+
+        let empty_formats: [TextFormats; 0] = [];
+        text_opts.add_formats(empty_formats);
+
+        assert_eq!(text_opts.formats, Option::None);
+
+        let serialized = serde_json::to_value(&text_opts).unwrap();
+
+        // NOTE: Testing serialization when TextOptions == None <07-09-21, kunzaatko> //
+        assert_eq!(
+            serialized,
+            serde_json::to_value(TextOptions::default()).unwrap()
+        );
+    } // }}}
+
+    #[test]
+    fn formats_from_strings() {
+        // {{{
+        let mut options = TextOptions::default();
+        options
+            .add_formats_from_strings(["text", "data", "html", "latex_styled"])
+            .unwrap();
+        assert_eq!(
+            options.formats,
+            Some(
+                hashset! {TextFormats::Text, TextFormats::Data, TextFormats::Html, TextFormats::LaTeXStyled}
+            )
+        );
+
+        assert!(options.add_formats_from_strings(["error"]).is_err())
+    } // }}}
+
+    #[test]
+    fn add_format() {
+        // {{{
+        let mut options = TextOptions::default();
+        options
+            .add_formats_from_strings(["text", "data", "html", "latex_styled"])
+            .unwrap();
+        assert_eq!(
+            options.formats,
+            Some(
+                hashset! {TextFormats::Text, TextFormats::Data, TextFormats::Html, TextFormats::LaTeXStyled}
+            )
+        );
+    } // }}}
 
     #[test]
     fn serialize_text_formats() {

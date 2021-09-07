@@ -31,13 +31,13 @@ pub enum TextOptionsError {
     UnreasonableOptions(#[from] UnreasonableOptionsError),
 }
 
-#[derive(Error, Debug)]
+#[derive(Error, Debug, PartialEq)]
 pub enum UnreasonableOptionsError {
     #[error("NoAlphabetsAllowed: There should be atleast one alphabet allowed.")]
     NoAlphabetsAllowed,
 }
 
-#[derive(Error, Debug)]
+#[derive(Error, Debug, PartialEq)]
 pub enum LogicalFallacyError {
     #[error(
         "AlphabetsAllowedLogicalFallacy: {true_alphabet} and {false_alphabet} are both being set."
