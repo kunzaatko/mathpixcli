@@ -148,7 +148,7 @@ fn main() {
                 .arg("LaTeXBodyOptions.format_options.transforms")
                 .arg("LaTeXBodyOptions.format_options.math_delimiters")
                 .arg("LaTeXBodyOptions.format_options.displaymath_delims")
-                .multiple_values(true),
+                .multiple(true),
         ) //}}}
         .arg(
             // LaTeXBodyOptions.format_options.transforms {{{
