@@ -178,7 +178,6 @@ where
         header: H,
     ) -> Result<reqwest::Request, Self::Error>
     where
-        // TODO:  <05-07-21, kunzaatko> //
         <Self as MathpixEndpoint>::Error: From<reqwest::Error>,
     {
         let headers: reqwest::header::HeaderMap = header.into().into();

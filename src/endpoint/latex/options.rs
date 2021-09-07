@@ -1,4 +1,4 @@
-use super::super::shared_objects::request::{CallBack, ImageSrc, MetaData};
+use super::super::shared_objects::request::{CallBack, ConfidenceThreshold, ImageSrc, MetaData};
 use serde::Serialize;
 
 // LaTeXOptions {{{
@@ -10,9 +10,8 @@ pub struct LaTeXOptions {
     pub format_options: Option<FormatOptions>,
     /// > Force algorithm to consider whole image
     pub skip_recrop: Option<bool>,
-    // TODO: bounded 0-1. <01-05-21, kunzaatko> //
     /// > Set threshold for triggering confidence errors
-    pub confidence_threshold: Option<f32>,
+    pub confidence_threshold: Option<ConfidenceThreshold>,
     // TODO: this should be bounded. It is from 1-5. <01-05-21, kunzaatko> //
     /// > Number of results to consider during recognition (an integer 1-5)
     pub beam_size: Option<u8>,
@@ -50,11 +49,12 @@ impl Default for LaTeXOptions {
     }
 }
 
+// TODO: Replace with concrete functions without use of macro <07-09-21, kunzaatko> //
 impl LaTeXOptions {
     field_builder![ocr, Vec<Ocr>];
     field_builder![format_options, FormatOptions];
     field_builder![skip_recrop, bool];
-    field_builder![confidence_threshold, f32];
+    field_builder![confidence_threshold, ConfidenceThreshold];
     field_builder![beam_size, u8];
     field_builder![n_best, u8];
     field_builder![region, Region];
@@ -158,6 +158,7 @@ mod latex_options_tests {
     use super::*;
     use reqwest::Url;
     use serde_json::{json, Value::Null};
+    use std::convert::TryInto;
 
     #[test]
     fn serialize_latexformats() {
@@ -262,7 +263,7 @@ mod latex_options_tests {
             ocr,
             format_options,
             skip_recrop: Some(false),
-            confidence_threshold: Some(1.0),
+            confidence_threshold: Some(1.0_f32.try_into().unwrap()),
             beam_size: Some(4),
             n_best: Some(3),
             region,
@@ -333,7 +334,7 @@ mod latex_options_tests {
             .ocr(vec![Ocr::Math, Ocr::Text])
             .format_options(format_options.clone())
             .skip_recrop(true)
-            .confidence_threshold(0.42)
+            .confidence_threshold(0.42_f32.try_into().unwrap())
             .beam_size(6)
             .n_best(4)
             .callback(callback.clone())
@@ -345,7 +346,7 @@ mod latex_options_tests {
             ocr: Some(vec![Ocr::Math, Ocr::Text]),
             format_options: Some(format_options),
             skip_recrop: Some(true),
-            confidence_threshold: Some(0.42),
+            confidence_threshold: Some(0.42_f32.try_into().unwrap()),
             beam_size: Some(6),
             callback: Some(callback),
             auto_rotate_confidence_threshold: Some(0.42),

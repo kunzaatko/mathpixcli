@@ -24,10 +24,8 @@ pub struct TextOptions {
     pub include_detected_alphabets: Option<bool>,
     /// > See [AlphabetsAllowed](https://docs.mathpix.com/?shell#alphabetsallowed-object) section, use this to specify which alphabets you don't want in the output
     pub alphabets_allowed: Option<AlphabetsAllowed>,
-    // TODO: Add the num bounded trait (is between 0 and 1) <30-04-21, kunzaatko> //
     /// > Specifies threshold for triggering confidence errors
     pub confidence_threshold: Option<ConfidenceThreshold>,
-    // TODO: Add the num bounded trait (is between 0 and 1) <30-04-21, kunzaatko> //
     /// > Specifies threshold for triggering confidence errors, default `0.75` (symbol level threshold)
     pub confidence_rate_threshold: Option<ConfidenceThreshold>,
     /// > Specifies whether to return information segmented line by line, see [LineData](https://docs.mathpix.com/?shell#linedata-object) object section for details
@@ -40,7 +38,6 @@ pub struct TextOptions {
     pub include_inchi: Option<bool>,
     /// > Enable data extraction for geometry diagrams (currently only supports triangle diagrams); see [GeometryData](https://docs.mathpix.com/?shell#geometry-objects)
     pub include_geometry_data: Option<bool>,
-    // TODO: Add the num bounded trait (is between 0 and 1) <30-04-21, kunzaatko> //
     /// > Specifies threshold for auto rotating image to correct orientation; by default it is set to `0.99`, can be disabled with a value of `1` (see [Auto rotation](https://docs.mathpix.com/?shell#auto-rotation) section for details)
     pub auto_rotate_confidence_threshold: Option<ConfidenceThreshold>,
     /// > Determines whether extra white space is removed from equations in `latex_styled` and `text` formats. Default is `true`.
