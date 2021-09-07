@@ -15,7 +15,7 @@ fn main() {
                         .about("list of formats required in the output")
                         .value_name("FORMAT")
                         .possible_values(&["text", "html", "data", "latex_styled", "all"])
-                        .multiple(true)
+                        .multiple_values(true)
                         .takes_value(true),
                 )//}}}
                 .arg(
@@ -26,7 +26,7 @@ fn main() {
                         .about("list of data options for the outputs")
                         .value_name("OPTION")
                         .possible_values(&["include_svg", "include_table_html", "include_latex", "include_tsv", "include_acsiimath", "include_mathml", "all"])
-                        .multiple(true)
+                        .multiple_values(true)
                 )//}}}
                 .arg(
                     // TextBodyOptions.include_detected_alphabets {{{
@@ -43,7 +43,7 @@ fn main() {
                         .long("alphabets_allowed")
                         .value_name("ALPHABET")
                         .takes_value(true)
-                        .multiple(true)
+                        .multiple_values(true)
                         .possible_values(&["en","hi","zh","ja","ko","ru","th","all"])
                 )//}}}
                 .arg(
@@ -128,7 +128,7 @@ fn main() {
                     "wolfram",
                     "all",
                 ])
-                .multiple(true)
+                .multiple_values(true)
                 .required(true),
         ) //}}}
         .arg(
@@ -140,7 +140,7 @@ fn main() {
                 .possible_values(&["text", "math", "all"])
                 .value_name("OCR")
                 .takes_value(true)
-                .multiple(true),
+                .multiple_values(true),
         ) //}}}
         .group(
             // LaTeXBodyOptions.format_options {{{
@@ -148,7 +148,7 @@ fn main() {
                 .arg("LaTeXBodyOptions.format_options.transforms")
                 .arg("LaTeXBodyOptions.format_options.math_delimiters")
                 .arg("LaTeXBodyOptions.format_options.displaymath_delims")
-                .multiple(true),
+                .multiple_values(true),
         ) //}}}
         .arg(
             // LaTeXBodyOptions.format_options.transforms {{{
@@ -166,7 +166,7 @@ fn main() {
                     "all",
                 ])
                 .value_name("TRANSFORM")
-                .multiple(true),
+                .multiple_values(true),
         ) //}}}
         .arg(
             // LaTeXBodyOptions.format_options.math_delimiters {{{
@@ -176,7 +176,7 @@ fn main() {
                 .about("delimiters to be used in inline math")
                 .number_of_values(2)
                 .value_names(&["LDELIM", "RDELIM"])
-                .multiple(true),
+                .multiple_values(true),
         ) //}}}
         // TODO: Add aliases <29-05-21, kunzaatko> //
         .arg(
@@ -249,7 +249,7 @@ fn main() {
             Arg::new("LaTeXBodyOptions.callback.headers")
                 .long("headers")
                 .about("key value pairs of headers to make callback post")
-                .multiple(true)
+                .multiple_values(true)
                 .value_names(&["KEY", "VALUE"]),
         ) //}}}
         // TODO: What are the possible values for this <29-05-21, kunzaatko> //
@@ -258,7 +258,7 @@ fn main() {
             Arg::new("LaTeXBodyOptions.callback.reply")
                 .long("reply")
                 .about("values for `reply` field of callback object")
-                .multiple(true)
+                .multiple_values(true)
                 .value_name("VALUE"),
         ) //}}}
         .arg(
@@ -281,7 +281,7 @@ fn main() {
                 .about("list of formats required in the output")
                 .value_name("FORMAT")
                 .possible_values(&["text", "data", "html", "all"])
-                .multiple(true),
+                .multiple_values(true),
         ) //}}}
         .arg(
             // StrokesBodyOptions.data_options {{{
@@ -298,7 +298,7 @@ fn main() {
                     "include_mathml",
                     "all",
                 ])
-                .multiple(true),
+                .multiple_values(true),
         ); //}}}
            //}}}
 

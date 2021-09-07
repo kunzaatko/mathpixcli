@@ -6,13 +6,13 @@ use thiserror::Error;
 #[derive(Error, Debug)]
 pub enum TextError {
     #[error("SerializationError: {0}")]
-    SerializationError(#[from] serde_json::Error),
+    Serialization(#[from] serde_json::Error),
     #[error("SrcError: {0}")]
-    SrcError(#[from] Base64ImageError),
+    Src(#[from] Base64ImageError),
     #[error("RequestError: {0}")]
-    RequestError(#[from] reqwest::Error),
+    Request(#[from] reqwest::Error),
     #[error("OptionsError: {0}")]
-    OptionsError(#[from] TextOptionsError),
+    Options(#[from] TextOptionsError),
 }
 
 impl From<std::convert::Infallible> for TextError {
@@ -54,16 +54,16 @@ pub enum BadOptionError {
         "BadTextFormat: {0} is not available as a text format. Possible options are {:?}.",
         TEXT_FORMATS
     )]
-    BadTextFormat(String),
+    TextFormat(String),
     #[error(
         "BadDataOption: {0} is not available as data option. Possible options are {:?}.",
         DATA_OPTIONS
     )]
-    BadDataOption(String),
+    DataOption(String),
     #[error("BadAlphabetAllowed: {0} is not available as an allowed alphabet. Possible options are {:?}.", ALPHABETS_ALLOWED)]
-    BadAlphabetAllowed(String),
+    AlphabetAllowed(String),
     #[error("BadConfidenceThreshold: {0}")]
-    BadConfidenceThreshold(#[from] ConfidenceThresholdError),
+    ConfidenceThreshold(#[from] ConfidenceThresholdError),
 }
 
 const TEXT_FORMATS: &[&str] = &["text", "data", "html", "latex_styled"];

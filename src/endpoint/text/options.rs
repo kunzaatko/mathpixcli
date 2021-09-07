@@ -134,7 +134,7 @@ impl TextOptions {
                     "data" => self_formats.insert(TextFormats::Data),
                     "html" => self_formats.insert(TextFormats::Html),
                     "latex_styled" => self_formats.insert(TextFormats::LaTeXStyled),
-                    format => return Err(BadOptionError::BadTextFormat(format.into()).into()),
+                    format => return Err(BadOptionError::TextFormat(format.into()).into()),
                 };
             }
             if self_formats.is_empty() {
@@ -201,7 +201,7 @@ impl TextOptions {
                     "include_tsv" => self_data_options.include_tsv = Some(true),
                     "noinclude_tsv" | "!include_tsv" => self_data_options.include_tsv = Some(false),
                     data_option => {
-                        return Err(BadOptionError::BadDataOption(data_option.into()).into())
+                        return Err(BadOptionError::DataOption(data_option.into()).into())
                     }
                 }
             }
@@ -243,9 +243,9 @@ impl TextOptions {
                     || alphabets_as_ref.contains(&noalpha.as_ref()));
             let mut true_alphabet = String::new();
             let mut false_alphabet = String::new();
-            if fallacy == true {
+            if fallacy {
                 true_alphabet = alpha.to_string();
-                false_alphabet = if alphabets_as_ref.contains(&excl_alpha.as_ref()) == true {
+                false_alphabet = if alphabets_as_ref.contains(&excl_alpha.as_ref()) {
                     excl_alpha
                 } else {
                     noalpha
@@ -261,10 +261,8 @@ impl TextOptions {
 
         for alphabet in &alphabets_as_ref {
             // NOTE: This works because all of the alphabets have 2 characters <25-07-21, kunzaatko> //
-            if alphabet.chars().count() == 2 {
-                if has_logical_fallacy(alphabet) {
-                    return Err(err);
-                }
+            if alphabet.chars().count() == 2 && has_logical_fallacy(alphabet) {
+                return Err(err);
             }
         }
 
@@ -297,14 +295,14 @@ impl TextOptions {
                         };
                     }
                     alphabet => {
-                        return Err(BadOptionError::BadAlphabetAllowed(alphabet.to_string()).into());
+                        return Err(BadOptionError::AlphabetAllowed(alphabet.to_string()).into());
                     }
                 }
             }
         }
 
         if let Some(self_alphabets_allowed) = &self.alphabets_allowed {
-            if (&self_alphabets_allowed).all_false() {
+            if self_alphabets_allowed.all_false() {
                 return Err(UnreasonableOptionsError::NoAlphabetsAllowed.into());
                 // TODO:  <25-07-21, kunzaatko> //
             }

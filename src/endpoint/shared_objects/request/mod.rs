@@ -189,7 +189,7 @@ impl Bounded for ConfidenceThreshold {
 impl TryFrom<f32> for ConfidenceThreshold {
     type Error = ConfidenceThresholdError;
     fn try_from(value: f32) -> Result<Self, Self::Error> {
-        if 0.0 <= value && value <= 1.0 {
+        if (0.0..=1.0).contains(&value) {
             Ok(Self { value })
         } else {
             Err(ConfidenceThresholdError::ValueOutOfBoundsError(value))

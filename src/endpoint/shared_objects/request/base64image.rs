@@ -34,10 +34,9 @@ impl TryFrom<PathBuf> for Base64Image {
     //{{{
     type Error = Base64ImageError;
     fn try_from(path: PathBuf) -> Result<Self, Self::Error> {
-        let extension = path.extension().ok_or(Self::Error::ExtensionError(format!(
-            "File {:?} has an invalid extension.",
-            path
-        )))?;
+        let extension = path.extension().ok_or_else(|| {
+            Self::Error::ExtensionError(format!("File {:?} has an invalid extension.", path))
+        })?;
         let img_mime = match extension {
             // FIX: error handling <22-05-21, kunzaatko> //
             _ if JPEG_EXTENSIONS.contains(&extension.to_str().unwrap().to_lowercase().as_str()) => {
