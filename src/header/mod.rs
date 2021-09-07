@@ -64,7 +64,7 @@ impl From<AuthHeader> for HeaderMap {
 
 // TESTS {{{
 #[cfg(test)]
-mod tests {
+mod header_tests {
     use super::AuthHeader;
     use reqwest::header::{HeaderMap, HeaderValue};
     use std::convert::TryFrom;

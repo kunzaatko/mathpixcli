@@ -216,7 +216,7 @@ pub enum ConfidenceThresholdError {
 
 // TESTS {{{
 #[cfg(test)]
-mod test {
+mod request_shared_objects_tests {
     use super::Base64Image;
     use super::{DataOptions, ImageSrc};
     use reqwest::Url;

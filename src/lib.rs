@@ -1,3 +1,4 @@
+#![feature(exact_size_is_empty)]
 #![allow(unused_imports, dead_code)]
 /*!
 This is a crate for creating [API](https://docs.mathpix.com/?shell#introduction) requests for Mathpix.

@@ -153,7 +153,7 @@ pub struct Region {
 
 // TESTS {{{
 #[cfg(test)]
-mod test {
+mod latex_options_tests {
     use super::super::*;
     use super::*;
     use reqwest::Url;

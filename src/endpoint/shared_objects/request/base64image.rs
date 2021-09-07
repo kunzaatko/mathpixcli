@@ -84,7 +84,7 @@ impl Serialize for Base64Image {
 
 // TESTS {{{
 #[cfg(test)]
-mod test {
+mod base64image_tests {
     use super::*;
     use mime::IMAGE_JPEG;
     use serde_json::json;

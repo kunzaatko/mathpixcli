@@ -6,7 +6,8 @@ use super::error::{
     UnreasonableOptionsError,
 };
 use rayon::prelude::*;
-use serde::Serialize;
+use serde::{ser::SerializeSeq, Serialize, Serializer};
+use std::collections::HashSet;
 use std::convert::TryInto;
 
 #[derive(Serialize, Debug, PartialEq)]
@@ -14,8 +15,9 @@ pub struct TextOptions {
     // {{{
     /// > Key value object
     pub metadata: Option<MetaData>,
+    #[serde(serialize_with = "ser_set")]
     /// > List of formats, one of `text`, `data`, `html`, `latex_styled`, see [Format Descriptions](https://docs.mathpix.com/?shell#format-descriptions)
-    pub formats: Option<Vec<TextFormats>>,
+    pub formats: Option<HashSet<TextFormats>>,
     /// > See [DataOptions](https://docs.mathpix.com/?shell#dataoptions-object) section, specifies outputs for `data` and `html` return fields
     pub data_options: Option<DataOptions>,
     /// > Return detected alphabets
@@ -49,6 +51,22 @@ pub struct TextOptions {
     pub numbers_default_to_math: Option<bool>,
 } // }}}
 
+pub fn ser_set<S>(set: &Option<HashSet<TextFormats>>, s: S) -> Result<S::Ok, S::Error>
+where
+    S: Serializer,
+{
+    if let Some(set) = set {
+        let vec: Vec<&TextFormats> = set.iter().collect();
+        let mut seq = s.serialize_seq(Some(vec.len()))?;
+        for format in vec {
+            seq.serialize_element(format)?;
+        }
+        seq.end()
+    } else {
+        s.serialize_none()
+    }
+}
+
 impl Default for TextOptions {
     // {{{
     fn default() -> Self {
@@ -75,6 +93,7 @@ impl Default for TextOptions {
 
 impl TextOptions {
     //{{{
+    // TODO: When implemented in rust <05-09-21, kunzaatko> //
     // type Error = TextOptionsError;
 
     pub fn set_metadata(&mut self) -> &mut Self {
@@ -87,43 +106,53 @@ impl TextOptions {
     ///
     /// # Examples
     /// ```
+    /// use maplit::hashset;
     /// use mathpixapi::endpoint::text::{TextOptions, TextFormats};
     /// let mut options = TextOptions::default();
     /// options.add_formats_from_strings(&["text", "data"]).unwrap().add_formats_from_strings(&["html"]).unwrap();
     /// let mut expected = TextOptions::default();
-    /// expected.formats = Some(vec![TextFormats::Text, TextFormats::Data,
+    /// expected.formats = Some(hashset![TextFormats::Text, TextFormats::Data,
     /// TextFormats::Html]);
     /// assert_eq!(options, expected);
     /// ```
 
-    pub fn add_formats_from_strings<S: AsRef<str>>(
+    pub fn add_formats_from_strings<S, I: IntoIterator<Item = S>>(
         &mut self,
-        formats: &[S],
-    ) -> Result<&mut Self, TextOptionsError> {
+        formats: I,
+    ) -> Result<&mut Self, TextOptionsError>
+    where
+        S: AsRef<str>,
+    {
         //{{{
-        if self.formats == None && !formats.is_empty() {
-            self.formats = Some(Vec::new());
+        if self.formats == None {
+            self.formats = Some(HashSet::new());
         }
         if let Some(self_formats) = &mut self.formats {
-            for format in formats {
+            for format in formats.into_iter() {
                 match format.as_ref() {
-                    "text" => self_formats.push(TextFormats::Text),
-                    "data" => self_formats.push(TextFormats::Data),
-                    "html" => self_formats.push(TextFormats::Html),
-                    "latex_styled" => self_formats.push(TextFormats::LaTeXStyled),
+                    "text" => self_formats.insert(TextFormats::Text),
+                    "data" => self_formats.insert(TextFormats::Data),
+                    "html" => self_formats.insert(TextFormats::Html),
+                    "latex_styled" => self_formats.insert(TextFormats::LaTeXStyled),
                     format => return Err(BadOptionError::BadTextFormat(format.into()).into()),
-                }
+                };
+            }
+            if self_formats.is_empty() {
+                self.formats = None;
             }
         }
         Ok(self)
     } //}}}
 
-    pub fn add_formats(&mut self, formats: &[TextFormats]) -> &mut Self {
+    pub fn add_formats<I: IntoIterator<Item = TextFormats>>(&mut self, formats: I) -> &mut Self {
         //{{{
         if let Some(self_formats) = &mut self.formats {
-            self_formats.append(&mut formats.to_vec());
+            for format in formats.into_iter() {
+                self_formats.insert(format);
+            }
         } else {
-            self.formats = Some(formats.to_vec());
+            self.formats = Some(HashSet::new());
+            self.add_formats(formats);
         }
         self
     } //}}}
@@ -131,9 +160,11 @@ impl TextOptions {
     pub fn add_format(&mut self, format: TextFormats) -> &mut Self {
         //{{{
         if let Some(formats) = &mut (self.formats) {
-            formats.push(format);
+            formats.insert(format);
         } else {
-            self.formats = Some(vec![format]);
+            let mut set = HashSet::new();
+            set.insert(format);
+            self.formats = Some(set);
         }
         self
     } //}}}
@@ -361,7 +392,7 @@ impl TextOptions {
 } //}}}
 
 /// Format specifications possible for the _text_ endpoint
-#[derive(Debug, Serialize, PartialEq, Clone)]
+#[derive(Debug, Serialize, Eq, Clone, Hash, PartialEq)]
 #[serde(rename_all = "snake_case")]
 pub enum TextFormats {
     //{{{
@@ -393,12 +424,14 @@ impl ToString for TextFormats {
 
 // TESTS {{{
 #[cfg(test)]
-mod test {
+mod text_options_tests {
     use super::super::super::shared_objects::request::Base64Image;
     use super::super::{AlphabetsAllowed, DataOptions, ImageSrc, Text, TextFormats, TextOptions};
     use serde_json::{json, Value::Null};
     use std::convert::TryInto;
     use std::path::PathBuf;
+
+    use maplit::hashset;
 
     #[test]
     fn alphabets_allow() {
@@ -484,6 +517,16 @@ mod test {
     } //}}}
 
     #[test]
+    fn formats_add_empty() {
+        let mut text_opts = TextOptions::default();
+
+        let empty_formats: [&str; 0] = [];
+        text_opts.add_formats_from_strings(empty_formats).unwrap();
+
+        assert_eq!(text_opts.formats, Option::None);
+    }
+
+    #[test]
     fn serialize_text_formats() {
         //{{{
         let text_formats: Vec<TextFormats> = vec![
@@ -539,7 +582,7 @@ mod test {
 
         let text_opts = TextOptions {
             metadata: None,
-            formats: Some(vec![TextFormats::Text, TextFormats::Data]),
+            formats: Some(hashset! {TextFormats::Text, TextFormats::Data}),
             alphabets_allowed: Some(alphabets_allowed),
             auto_rotate_confidence_threshold: Some(1.0.try_into().unwrap()),
             confidence_threshold: Some(1.0.try_into().unwrap()),
@@ -561,7 +604,9 @@ mod test {
             options: text_opts,
         };
         let serialized = serde_json::to_value(&text).unwrap();
-        let expected = json!({
+        // NOTE: Because there is no way tell the order of the TextFormats in the serialized array
+        // (because it is a set) we have to have two different serializations that are right <07-09-21, kunzaatko> //
+        let expected_1 = json!({
             "src" : "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAMCAgICAgMCAgIDAwMDBAYEBAQEBAgGBgUGCQgKCgkICQkKDA8MCgsOCwkJDRENDg8QEBEQCgwSExIQEw8QEBD/wAALCAACAAIBAREA/8QAFAABAAAAAAAAAAAAAAAAAAAACP/EABwQAAEFAQEBAAAAAAAAAAAAAAIBAwQFBgcIAP/aAAgBAQAAPwBfeevPXAt7wLmm63XD+f6PSaPH01tcXFtmYUydZTpEJp1+TIfdbJx55xwzM3DJSIiUlVVVV+//2Q==",
             "metadata": Null,
             "formats": ["text", "data"],
@@ -595,7 +640,42 @@ mod test {
             "rm_spaces": false,
             "numbers_default_to_math": Null,
         });
-        assert_eq!(serialized, expected);
+
+        let expected_2 = json!({
+            "src" : "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAMCAgICAgMCAgIDAwMDBAYEBAQEBAgGBgUGCQgKCgkICQkKDA8MCgsOCwkJDRENDg8QEBEQCgwSExIQEw8QEBD/wAALCAACAAIBAREA/8QAFAABAAAAAAAAAAAAAAAAAAAACP/EABwQAAEFAQEBAAAAAAAAAAAAAAIBAwQFBgcIAP/aAAgBAQAAPwBfeevPXAt7wLmm63XD+f6PSaPH01tcXFtmYUydZTpEJp1+TIfdbJx55xwzM3DJSIiUlVVVV+//2Q==",
+            "metadata": Null,
+            "formats": ["data","text"],
+            "alphabets_allowed": {
+                "en" : true,
+                "ru" : true,
+                "hi" : Null,
+                "zh" : Null,
+                "ja" : Null,
+                "ko" : Null,
+                "th" : Null,
+            },
+            "auto_rotate_confidence_threshold": 1.,
+            "confidence_threshold": 1.,
+            "confidence_rate_threshold": 1.,
+            "data_options": {
+                "include_asciimath": true,
+                "include_latex": false,
+                "include_mathml": Null,
+                "include_svg": Null,
+                "include_table_html": Null,
+                "include_tsv": Null,
+            },
+            "include_detected_alphabets": true,
+            "include_geometry_data": false,
+            "include_inchi": true,
+            "include_line_data": false,
+            "include_smiles": true,
+            "include_word_data": false,
+            "rm_fonts": true,
+            "rm_spaces": false,
+            "numbers_default_to_math": Null,
+        });
+        assert!([expected_1, expected_2].iter().any(|r| *r == serialized));
     } //}}}
 
     #[test]
@@ -603,9 +683,9 @@ mod test {
         //{{{
         let mut text_body_options = TextOptions::default();
         text_body_options.add_format(TextFormats::Data);
-        text_body_options.add_formats(&[TextFormats::LaTeXStyled, TextFormats::Html]);
+        text_body_options.add_formats([TextFormats::LaTeXStyled, TextFormats::Html]);
         let mut expected = TextOptions::default();
-        expected.formats = Some(vec![
+        expected.formats = Some(hashset![
             TextFormats::Data,
             TextFormats::LaTeXStyled,
             TextFormats::Html,

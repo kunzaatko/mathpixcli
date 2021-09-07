@@ -39,7 +39,7 @@ pub enum StrokesFormats {
 
 // TESTS {{{
 #[cfg(test)]
-mod test {
+mod strokes_options_tests {
     use super::StrokesFormats;
     use serde_json::json;
 

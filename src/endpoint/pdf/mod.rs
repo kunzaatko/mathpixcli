@@ -76,7 +76,7 @@ pub enum PDFSrc {
 
 // TESTS {{{
 #[cfg(test)]
-mod test {
+mod pdf_endpoint_tests {
     use super::{PDFOptions, PDFSrc, PDF};
     use reqwest::Url;
     use serde_json::json;
