@@ -16,26 +16,18 @@ pub struct Base64Image {
 
 #[derive(Error, Debug)]
 pub enum Base64ImageError {
-    ExtensionError(String),
-    FileTypeError(String),
+    #[error("InvalidExtension: {0}")]
+    InvalidExtension(String),
+    #[error("UnsupportedFileType: {0}")]
+    UnsupportedFileType(String),
 }
-
-impl std::fmt::Display for Base64ImageError {
-    //{{{
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        match self {
-            Base64ImageError::ExtensionError(context) => write!(f, "ExtensionError: {}", context),
-            Base64ImageError::FileTypeError(context) => write!(f, "FileTypeError: {}", context),
-        }
-    }
-} //}}}
 
 impl TryFrom<PathBuf> for Base64Image {
     //{{{
     type Error = Base64ImageError;
     fn try_from(path: PathBuf) -> Result<Self, Self::Error> {
         let extension = path.extension().ok_or_else(|| {
-            Self::Error::ExtensionError(format!("File {:?} has an invalid extension.", path))
+            Self::Error::InvalidExtension(format!("File {:?} has an invalid extension.", path))
         })?;
         let img_mime = match extension {
             // FIX: error handling <22-05-21, kunzaatko> //
@@ -46,7 +38,7 @@ impl TryFrom<PathBuf> for Base64Image {
                 IMAGE_PNG
             }
             _ => {
-                return Err(Self::Error::FileTypeError(format!(
+                return Err(Self::Error::UnsupportedFileType(format!(
                     "File {:?} has an unsupported filetype. jpg and png images are supported.",
                     path
                 )))
@@ -84,10 +76,13 @@ impl Serialize for Base64Image {
 // TESTS {{{
 #[cfg(test)]
 mod base64image_tests {
+    use super::Base64ImageError;
     use super::*;
     use mime::IMAGE_JPEG;
+    use regex::Regex;
     use serde_json::json;
     use std::convert::TryInto;
+    use std::fmt::Display;
     use std::path::PathBuf;
 
     #[test]
@@ -107,12 +102,22 @@ mod base64image_tests {
     #[test]
     fn base64image_from_pathbuf_no_extension() {
         // {{{
-        let base64image: Result<Base64Image, Base64ImageError> =
-            PathBuf::from("./test/assets/test_encode_base64".to_string()).try_into();
+        let path_str = "./test/assets/test_encode_base64".to_string();
+        let path = PathBuf::from(&path_str);
+        let base64image: Result<Base64Image, Base64ImageError> = path.try_into();
         assert!(match base64image {
-            Err(Base64ImageError::ExtensionError(_)) => true,
+            Err(Base64ImageError::InvalidExtension(_)) => true,
             _ => false,
-        })
+        });
+
+        let error_re = Regex::new(r"InvalidExtension: .*").unwrap();
+
+        println!(
+            "Matching: {} with regex {}",
+            base64image.as_ref().unwrap_err(),
+            error_re
+        );
+        assert!(error_re.is_match(&format!("{}", base64image.unwrap_err())))
     } //}}}
 
     #[test]
@@ -121,7 +126,7 @@ mod base64image_tests {
         let base64image: Result<Base64Image, Base64ImageError> =
             PathBuf::from("./test/assets/test_encode_base64.txt".to_string()).try_into();
         assert!(match base64image {
-            Err(Base64ImageError::FileTypeError(_)) => true,
+            Err(Base64ImageError::UnsupportedFileType(_)) => true,
             _ => false,
         })
     } // }}}
