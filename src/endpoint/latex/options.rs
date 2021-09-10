@@ -2,7 +2,7 @@ use super::super::shared_objects::request::{CallBack, ConfidenceThreshold, Image
 use serde::Serialize;
 
 // LaTeXOptions {{{
-#[derive(Debug, Serialize, PartialEq)]
+#[derive(Debug, Serialize, PartialEq, Default)]
 pub struct LaTeXOptions {
     /// > Process only math `["math"]` or both math and text `["math", "text"]`
     pub ocr: Option<Vec<Ocr>>,
@@ -29,24 +29,6 @@ pub struct LaTeXOptions {
     // TODO: bounded 0-1. <01-05-21, kunzaatko> //
     /// > Specifies threshold for auto rotating image to correct orientation; by default it is set to `0.99`, can be disabled with a value of `1` (see [Auto rotation](https://docs.mathpix.com/?shell#auto-rotation) section for details)
     pub auto_rotate_confidence_threshold: Option<f32>,
-}
-
-impl Default for LaTeXOptions {
-    fn default() -> Self {
-        LaTeXOptions {
-            ocr: None,
-            format_options: None,
-            skip_recrop: None,
-            confidence_threshold: None,
-            beam_size: None,
-            n_best: None,
-            region: None,
-            callback: None,
-            metadata: None,
-            include_detected_alphabets: None,
-            auto_rotate_confidence_threshold: None,
-        }
-    }
 }
 
 // TODO: Replace with concrete functions without use of macro <07-09-21, kunzaatko> //

@@ -2,7 +2,7 @@ pub use super::super::shared_objects::request::{DataOptions, MetaData};
 use serde::Serialize;
 
 // StrokesOptions {{{
-#[derive(Serialize, Debug)]
+#[derive(Serialize, Debug, Default)]
 pub struct StrokesOptions {
     /// > Key value object
     pub metadata: Option<MetaData>,
@@ -12,15 +12,6 @@ pub struct StrokesOptions {
     pub data_options: Option<DataOptions>,
 }
 
-impl Default for StrokesOptions {
-    fn default() -> Self {
-        Self {
-            metadata: None,
-            formats: None,
-            data_options: None,
-        }
-    }
-}
 //}}}
 
 // StrokesFormats {{{

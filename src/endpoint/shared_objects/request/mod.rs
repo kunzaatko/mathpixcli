@@ -31,7 +31,7 @@ impl Serialize for ImageSrc {
 pub struct MetaData {}
 
 // DataOptions {{{
-#[derive(Debug, Serialize, PartialEq, Clone)]
+#[derive(Debug, Serialize, PartialEq, Clone, Default)]
 pub struct DataOptions {
     /// > Include math SVG in `html` and `data` formats
     pub include_svg: Option<bool>,
@@ -49,19 +49,6 @@ pub struct DataOptions {
 
 impl DataOptions {
     // TODO:  <21-07-21, kunzaatko> //
-}
-
-impl Default for DataOptions {
-    fn default() -> Self {
-        DataOptions {
-            include_asciimath: None,
-            include_latex: None,
-            include_mathml: None,
-            include_svg: None,
-            include_table_html: None,
-            include_tsv: None,
-        }
-    }
 }
 
 //}}}
