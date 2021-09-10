@@ -128,7 +128,10 @@ mod base64image_tests {
         assert!(match base64image {
             Err(Base64ImageError::UnsupportedFileType(_)) => true,
             _ => false,
-        })
+        });
+
+        let error_re = Regex::new(r"UnsupportedFileType: .*").unwrap();
+        assert!(error_re.is_match(&format!("{}", base64image.unwrap_err())))
     } // }}}
 
     #[test]
