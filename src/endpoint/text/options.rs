@@ -10,7 +10,7 @@ use serde::{ser::SerializeSeq, Serialize, Serializer};
 use std::collections::HashSet;
 use std::convert::TryInto;
 
-#[derive(Serialize, Debug, PartialEq)]
+#[derive(Serialize, Debug, PartialEq, Default)]
 pub struct TextOptions {
     // {{{
     /// > Key value object
@@ -63,30 +63,6 @@ where
         s.serialize_none()
     }
 }
-
-impl Default for TextOptions {
-    // {{{
-    fn default() -> Self {
-        TextOptions {
-            metadata: None,
-            formats: None,
-            data_options: None,
-            include_detected_alphabets: None,
-            alphabets_allowed: None,
-            confidence_threshold: None,
-            confidence_rate_threshold: None,
-            include_line_data: None,
-            include_word_data: None,
-            include_smiles: None,
-            include_inchi: None,
-            include_geometry_data: None,
-            auto_rotate_confidence_threshold: None,
-            rm_spaces: None,
-            rm_fonts: None,
-            numbers_default_to_math: None,
-        }
-    }
-} // }}}
 
 impl TextOptions {
     //{{{

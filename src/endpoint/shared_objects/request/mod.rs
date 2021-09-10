@@ -81,7 +81,7 @@ pub struct CallBack {
 // AlphabetsAllowed {{{
 // NOTE: Serialization adds serde_json::Value::Null when None... This may not work with the API. A
 // test is needed. <21-05-21, kunzaatko> //
-#[derive(Debug, PartialEq, Serialize, Clone)]
+#[derive(Debug, PartialEq, Serialize, Clone, Default)]
 pub struct AlphabetsAllowed {
     /// English
     pub en: Option<bool>,
@@ -97,20 +97,6 @@ pub struct AlphabetsAllowed {
     pub ru: Option<bool>,
     /// Thai
     pub th: Option<bool>,
-}
-
-impl Default for AlphabetsAllowed {
-    fn default() -> Self {
-        AlphabetsAllowed {
-            en: None,
-            hi: None,
-            zh: None,
-            ja: None,
-            ko: None,
-            ru: None,
-            th: None,
-        }
-    }
 }
 
 impl AlphabetsAllowed {
